@@ -24,20 +24,28 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'numero_nomina' => 'EMP' . fake()->unique()->numerify('###'),
+            'nombre' => fake()->firstName(),
+            'apellido' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'telefono' => fake()->phoneNumber(),
+            'region_id' => 1, // puedes poner un id fijo o crear RegionSeeder
+            'cedis_id' => 1,
+            'rol_id' => 1,
+            'estatus' => 1,
         ];
     }
+
 
     /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

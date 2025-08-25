@@ -19,6 +19,10 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [RegisterController::class, 'register']);
 });
 
+// routes/web.php
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
