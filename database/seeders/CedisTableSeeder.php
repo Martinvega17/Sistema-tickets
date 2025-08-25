@@ -12,17 +12,22 @@ class CedisTableSeeder extends Seeder
     {
         $cedisPorRegion = [
             'Bajio' => [
-                'SAN LUIS PLANTA', 'LEÓN', 'AGUASCALIENTES', 'QUERÉTARO', 
-                'SAN JUAN DEL RÍO', 'CELAYA', 'IRAPUATO', 'SALAMANCA',
-                'GUANAJUATO', 'MOROLEÓN', 'ACÁMBARO', 'DOLORES HIDALGO'
+                'QUERETARO', 'SAN JUAN DEL RIO', 'SAN LUIS DE LA PAZ', 'PACHUCA', 
+                'TULANCINGO', 'ZACUALTIPAN', 'TEPEJI', 'CALERA',
+                'SANTA MARIA', 'SAN LUIS PLANTA', 'RIO VERDE', 'CD DEL MAIZ',
+                'CD VALLES', 'TAMAZUNCHALE', 'TANQUIAN', 'RIO GRANDE', 'OJUELOS',
+                'SAN MARCOS (AGUASCALIENTES)', 'CELAYA PLANTA', 'LAGOS DE MORENO',
+                'VALLE DE SANTIAGO', 'LEON ORIENTE', 'ACAMBARO', 'URIANGATO',
+                'CELAYA MEGA', 'CELAYA GARRAFON', 'CORTAZAR', 'SALVATIERRA', 
+                'DOLORES', 'SAN MIGUEL ALLENDE', 'RINCON DE ROMOS', 'TEOCALTICHE'
             ],
             'Corporativo' => [
-                'ITZTACALCO', 'CORPORATIVO CDMX', 'OFICINAS CENTRALES',
-                'ADMINISTRACIÓN', 'DIRECCIÓN GENERAL'
+                'ITZTACALCO', 'PROPLASA', 'TLALNEPANTLA', 'SANTA FE',
+                'CENTRO DE SERVICIOS ZAPOPAN'
             ],
             'Centro' => [
-                'PUEBLA', 'TLAXCALA', 'TOLUCA', 'CUAUTITLÁN', 'NAUCALPAN',
-                'ECATEPEC', 'NEZAHUALCÓYOTL', 'CHIMALHUACÁN', 'TEXCOCO'
+                'PUEBLA', 'PROPLASA', 'TLALNEPANTLA', 'SANTA FE',
+                'CENTRO DE SERVICIOS ZAPOPAN'
             ],
             'Metro' => [
                 'IZTAPALAPA', 'COYOACÁN', 'BENITO JUÁREZ', 'ÁLVARO OBREGÓN',
@@ -45,8 +50,7 @@ class CedisTableSeeder extends Seeder
                 'TUXTLA GUTIÉRREZ', 'OAXACA', 'ACAPULCO', 'CHILPANCINGO'
             ],
             'CAT' => [
-                'CENTRO DE DISTRIBUCIÓN', 'ALMACÉN PRINCIPAL', 'LOGÍSTICA',
-                'CADENA DE SUMINISTRO', 'INVENTARIOS'
+                'CAT'
             ]
         ];
 
