@@ -21,18 +21,22 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        // Intentar autenticar al usuario
+        // Buscar usuario por número de nómina
         $user = \App\Models\User::where('numero_nomina', $credentials['numero_nomina'])->first();
 
-        if ($user && Auth::attempt(['email' => $user->email, 'password' => $credentials['password']])) {
-            $request->session()->regenerate();
+        // Verificar si el usuario existe y las credenciales son correctas
+        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
 
-            if ($user->estatus !== 'activo') {
-                Auth::logout();
+            // Verificar estatus (1 = activo, 0 = inactivo)
+            if ($user->estatus !== 1) {
                 return back()->withErrors([
                     'numero_nomina' => 'Tu cuenta está inactiva. Contacta al administrador.',
                 ]);
             }
+
+            // Iniciar sesión manualmente
+            Auth::login($user, $request->has('remember'));
+            $request->session()->regenerate();
 
             // Redirigir según el rol
             switch ($user->rol_id) {

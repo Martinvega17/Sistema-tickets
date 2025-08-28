@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-pepsi-blue">Hola, {{ Auth::user()->nombre }} {{ Auth::user()->apellido }}!</h1>
+        <h1 class="text-3xl font-bold text-pepsi-blue">Hola, {{ Auth::user()->nombre }} !</h1>
         <p class="text-gray-600 mt-2">Estas son tus aplicaciones disponibles</p>
     </div>
 
@@ -68,32 +68,11 @@
                     <h3 class="text-xl font-semibold text-pepsi-light-blue">Self Service</h3>
                 </div>
                 <p class="text-gray-600 mb-4">Autogestiona todas las solicitudes y consulta la librería de soluciones.</p>
-                <button class="px-4 py-2 bg-pepsi-light-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
+                <!-- En la tarjeta Self Service -->
+                <button onclick="window.location.href='{{ route('self-service') }}'"
+                    class="px-4 py-2 bg-pepsi-light-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
                     Acceder
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estadísticas rápidas -->
-    <div class="mt-12">
-        <h2 class="text-2xl font-bold text-pepsi-blue mb-6">Resumen de actividad</h2>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
-                <div class="text-2xl font-bold text-pepsi-blue">12</div>
-                <div class="text-sm text-gray-600">Tickets abiertos</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
-                <div class="text-2xl font-bold text-pepsi-green">8</div>
-                <div class="text-sm text-gray-600">En progreso</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
-                <div class="text-2xl font-bold text-pepsi-red">3</div>
-                <div class="text-sm text-gray-600">Pendientes</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
-                <div class="text-2xl font-bold text-gray-600">24</div>
-                <div class="text-sm text-gray-600">Resueltos</div>
             </div>
         </div>
     </div>

@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; // 👈 importar
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable; // 👈 usarlo aquí
+    use HasFactory, Notifiable;
 
     protected $table = 'users';
 
@@ -32,7 +32,14 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'estatus' => 'integer', // Asegurar que se castee como entero
     ];
+
+    // Accessor para obtener el estatus como texto
+    public function getEstatusTextoAttribute()
+    {
+        return $this->estatus == 1 ? 'activo' : 'inactivo';
+    }
 
     // Relaciones
     public function region()

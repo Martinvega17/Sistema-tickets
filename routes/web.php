@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SelfServiceController;
+use App\Http\Controllers\UserController;
 use App\Models\Cedis;
 use Illuminate\Support\Facades\Route;
 
@@ -56,4 +58,15 @@ Route::get('/cedis-por-region/{regionId}', function ($regionId) {
         ->get(['id', 'nombre']);
 
     return response()->json($cedis);
+});
+
+// Ruta para Self Service (accesible sin autenticación)
+Route::get('/self-service', [SelfServiceController::class, 'index'])->name('self-service');
+
+// Rutas de usuarios
+Route::middleware(['auth'])->group(function () {
+    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+    Route::put('/usuarios/{user}/estatus', [UserController::class, 'updateStatus'])->name('usuarios.estatus');
+    Route::put('/usuarios/{user}/password', [UserController::class, 'resetPassword'])->name('usuarios.password');
+    Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
 });
