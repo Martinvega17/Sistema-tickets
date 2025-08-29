@@ -3,15 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard'); // Asegúrate de que esta vista extienda de layouts.app
+        $user = Auth::user();
+        $data = [
+            'user' => $user,
+            'userRole' => $user->rol_id
+        ];
+
+        return view('dashboard', $data);
     }
+
     public function configuracion()
     {
-        return view('configuracion'); // Crea esta vista si es necesario
+        // Esta ruta ya está protegida por middleware role:1,2
+        return view('configuracion');
     }
 }

@@ -69,4 +69,29 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/usuarios/{user}/estatus', [UserController::class, 'updateStatus'])->name('usuarios.estatus');
     Route::put('/usuarios/{user}/password', [UserController::class, 'resetPassword'])->name('usuarios.password');
     Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
+    Route::get('/user-json/{user}', [UserController::class, 'getUserJson'])->name('user.json');
 });
+
+// Rutas de usuarios
+Route::middleware(['auth'])->group(function () {
+    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+    Route::get('/usuarios/editar', [UserController::class, 'edit'])->name('usuarios.edit');
+    Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
+});
+
+// En routes/web.php, dentro del grupo de autenticación
+Route::middleware(['auth', 'role:1,2,3'])->group(function () {
+    // Rutas existentes...
+    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+    Route::get('/usuarios/editar', [UserController::class, 'edit'])->name('usuarios.edit');
+
+    // ✅ AGREGAR ESTA RUTA (FALTANTE)
+    Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');
+
+    // Rutas PUT existentes...
+    Route::put('/usuarios/{user}/estatus', [UserController::class, 'updateStatus'])->name('usuarios.estatus');
+    Route::put('/usuarios/{user}/password', [UserController::class, 'resetPassword'])->name('usuarios.password');
+    Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
+});
+
+
