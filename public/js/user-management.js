@@ -137,3 +137,83 @@ function togglePassword(inputId) {
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
     }
 }
+
+// Funcionalidad para gestión de CEDIS
+async function loadCedisData(cedisId) {
+    try {
+        const response = await fetch(`/cedis/${cedisId}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Error al cargar datos');
+
+        const cedis = await response.json();
+
+        // Llenar modal de edición
+        document.getElementById('edit_cedis_id').value = cedis.id;
+        document.getElementById('edit_nombre').value = cedis.nombre;
+        document.getElementById('edit_codigo').value = cedis.codigo;
+        document.getElementById('edit_direccion').value = cedis.direccion || '';
+        document.getElementById('edit_telefono').value = cedis.telefono || '';
+        document.getElementById('edit_responsable').value = cedis.responsable || '';
+        document.getElementById('edit_region_id').value = cedis.region_id;
+        document.getElementById('edit_ingeniero_id').value = cedis.ingeniero_id || '';
+        document.getElementById('edit_estatus').value = cedis.estatus;
+
+        // Mostrar modal
+        new bootstrap.Modal(document.getElementById('editCedisModal')).show();
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar los datos del CEDIS');
+    }
+}
+
+function toggleStatus(cedisId, currentStatus) {
+    if (confirm(`¿Estás seguro de ${currentStatus === 'activo' ? 'desactivar' : 'activar'} este CEDIS?`)) {
+        fetch(`/cedis/${cedisId}/estatus`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                estatus: currentStatus === 'activo' ? 'inactivo' : 'activo'
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cambiar el estatus');
+            });
+    }
+}
+
+function showCreateModal() {
+    // Resetear formulario
+    document.getElementById('createCedisForm').reset();
+    // Mostrar modal
+    new bootstrap.Modal(document.getElementById('createCedisModal')).show();
+}
+
+// Configurar event listeners
+document.addEventListener('DOMContentLoaded', function () {
+    // Configurar formulario de búsqueda
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const params = new URLSearchParams(formData).toString();
+            window.location.href = `${window.location.pathname}?${params}`;
+        });
+    }
+});
