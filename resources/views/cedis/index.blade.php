@@ -1,62 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Gestión de CEDIS</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-    <style>
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-
-        .pepsi-blue {
-            background-color: #004B93;
-        }
-
-        .pepsi-dark-blue {
-            background-color: #003A70;
-        }
-
-        .pepsi-red {
-            background-color: #e60012;
-        }
-
-        .hover\:pepsi-dark-blue:hover {
-            background-color: #003A70;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, .3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-</head>
-
-<body class="bg-gray-100">
+@section('content')
     <div class="container mx-auto px-4 py-8">
         <!-- Encabezado -->
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
@@ -156,9 +100,11 @@
         </div>
     </div>
 
-    <!-- Cargar el archivo JavaScript externo -->
-    <script src="{{ asset('js/cedis.js') }}"></script>
     @include('cedis.modals.destroy')
-</body>
+@endsection
 
-</html>
+<!-- Cargar el archivo JavaScript externo -->
+<script src="{{ asset('js/cedis.js') }}"></script>
+@include('cedis.modals.destroy')
+
+

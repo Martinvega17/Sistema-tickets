@@ -9,15 +9,33 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CedisController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Middleware para verificar permisos
+     */
+    private function checkAdminPermission()
     {
-        // Verificar permisos (solo admin y supervisor)
+        if (Auth::user()->rol_id != 1) {
+            abort(403, 'No tienes permisos para realizar esta acción');
+        }
+    }
+
+    private function checkAdminSupervisorPermission()
+    {
         if (Auth::user()->rol_id != 1 && Auth::user()->rol_id != 2) {
             abort(403, 'No tienes permisos para acceder a esta sección');
         }
+    }
+
+    /**
+     * Métodos para vistas
+     */
+    public function index(Request $request)
+    {
+        $this->checkAdminSupervisorPermission();
 
         $query = Cedis::with(['region', 'ingeniero']);
 
@@ -31,12 +49,11 @@ class CedisController extends Controller
             });
         }
 
-        // Filtrar por región
+        // Filtros
         if ($request->has('region') && !empty($request->region)) {
             $query->where('region_id', $request->region);
         }
 
-        // Filtrar por estatus
         if ($request->has('estatus') && $request->estatus !== '') {
             $query->where('estatus', $request->estatus);
         }
@@ -44,14 +61,7 @@ class CedisController extends Controller
         $cedis = $query->orderBy('nombre')->paginate(15);
         $regiones = Region::where('estatus', 'activo')->get();
 
-        // Obtener ingenieros (usuarios con rol_id 4 - Soporte)
-        $ingenieros = User::where('rol_id', 4) // Rol 4 = Soporte
-            ->where('estatus', 1) // 1 = activo
-            ->with('rol') // Cargar la relación rol
-            ->orderBy('nombre')
-            ->get(['id', 'numero_nomina', 'nombre', 'apellido', 'rol_id']);
-
-        // Si es petición AJAX, devolver JSON
+        // Para peticiones AJAX
         if ($request->ajax()) {
             return response()->json([
                 'cedis' => $cedis->items(),
@@ -62,41 +72,47 @@ class CedisController extends Controller
                     'total' => $cedis->total(),
                 ],
                 'regiones' => $regiones,
-                'ingenieros' => $ingenieros
+                'ingenieros' => $this->getIngenieros()
             ]);
         }
-
 
         return view('cedis.index', compact('regiones'));
     }
 
-    public function show(Request $request, $id)
+    public function create()
+    {
+        $this->checkAdminPermission();
+
+        return view('cedis.modals.create', [
+            'regiones' => Region::where('estatus', 'activo')->get(),
+            'ingenieros' => $this->getIngenieros()
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $this->checkAdminPermission();
+
+        $cedis = Cedis::findOrFail($id);
+
+        return view('cedis.modals.edit', [
+            'cedis' => $cedis,
+            'regiones' => Region::where('estatus', 'activo')->get(),
+            'ingenieros' => $this->getIngenieros(),
+            'id' => $id
+        ]);
+    }
+
+    /**
+     * Métodos para API/JSON
+     */
+    public function show($id)
     {
         try {
-            $cedis = Cedis::find($id);
-
-            if (!$cedis) {
-                return response()->json(['error' => 'CEDIS no encontrado'], 404);
-            }
-
-            // Cargar relaciones manualmente
-            try {
-                $cedis->region = \App\Models\Region::find($cedis->region_id);
-            } catch (\Exception $e) {
-                $cedis->region = null;
-            }
-
-            try {
-                if ($cedis->ingeniero_id) {
-                    $cedis->ingeniero = \App\Models\User::find($cedis->ingeniero_id);
-                } else {
-                    $cedis->ingeniero = null;
-                }
-            } catch (\Exception $e) {
-                $cedis->ingeniero = null;
-            }
-
+            $cedis = Cedis::with(['region', 'ingeniero'])->findOrFail($id);
             return response()->json($cedis);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'CEDIS no encontrado'], 404);
         } catch (\Exception $e) {
             Log::error('Error en show:', ['message' => $e->getMessage()]);
             return response()->json(['error' => 'Error al cargar el CEDIS'], 500);
@@ -106,9 +122,10 @@ class CedisController extends Controller
     public function getCedisData(Request $request)
     {
         try {
-            $query = Cedis::query();
+            $query = Cedis::with(['region', 'ingeniero']);
 
-            if ($request->query('search') && !empty($request->query('search'))) {
+            // Filtros
+            if ($request->query('search')) {
                 $search = $request->query('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('nombre', 'like', "%$search%")
@@ -116,7 +133,7 @@ class CedisController extends Controller
                 });
             }
 
-            if ($request->query('region') && !empty($request->query('region'))) {
+            if ($request->query('region')) {
                 $query->where('region_id', $request->query('region'));
             }
 
@@ -125,28 +142,6 @@ class CedisController extends Controller
             }
 
             $cedisList = $query->orderBy('nombre')->get();
-
-            // Cargar relaciones manualmente para evitar problemas
-            $cedisList->each(function ($cedis) {
-                try {
-                    $cedis->region = \App\Models\Region::find($cedis->region_id);
-                } catch (\Exception $e) {
-                    $cedis->region = null;
-                    Log::error('Error cargando región:', ['cedis_id' => $cedis->id, 'error' => $e->getMessage()]);
-                }
-
-                try {
-                    if ($cedis->ingeniero_id) {
-                        $cedis->ingeniero = \App\Models\User::find($cedis->ingeniero_id);
-                    } else {
-                        $cedis->ingeniero = null;
-                    }
-                } catch (\Exception $e) {
-                    $cedis->ingeniero = null;
-                    Log::error('Error cargando ingeniero:', ['cedis_id' => $cedis->id, 'error' => $e->getMessage()]);
-                }
-            });
-
             return response()->json($cedisList);
         } catch (\Exception $e) {
             Log::error('Error en getCedisData:', ['message' => $e->getMessage()]);
@@ -154,12 +149,83 @@ class CedisController extends Controller
         }
     }
 
+    /**
+     * Métodos CRUD
+     */
+    public function store(Request $request)
+    {
+        $this->checkAdminPermission();
+
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:100',
+            'direccion' => 'nullable|string',
+            'telefono' => 'nullable|string|max:20',
+            'responsable' => 'nullable|string|max:100',
+            'region_id' => 'required|exists:regiones,id',
+            'estatus' => 'required|in:activo,inactivo',
+            'ingeniero_id' => 'nullable|exists:users,id'
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            Cedis::create($request->all());
+            return redirect()->route('cedis.index')
+                ->with('success', 'CEDIS creado correctamente');
+        } catch (\Exception $e) {
+            Log::error('Error al crear CEDIS: ' . $e->getMessage());
+            return back()->with('error', 'Error al crear el CEDIS: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $this->checkAdminPermission();
+
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:100',
+            'direccion' => 'nullable|string',
+            'telefono' => 'nullable|string|max:20',
+            'responsable' => 'nullable|string|max:100',
+            'region_id' => 'required|exists:regiones,id',
+            'estatus' => 'required|in:activo,inactivo',
+            'ingeniero_id' => 'nullable|exists:users,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $cedis = Cedis::findOrFail($id);
+
+            $cedis->update([
+                'nombre' => $request->nombre,
+                'direccion' => $request->direccion,
+                'telefono' => $request->telefono,
+                'responsable' => $request->responsable,
+                'region_id' => $request->region_id,
+                'estatus' => $request->estatus,
+                'ingeniero_id' => $request->ingeniero_id
+            ]);
+
+            return response()->json([
+                'message' => 'CEDIS actualizado correctamente',
+                'cedis' => $cedis
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'CEDIS no encontrado'], 404);
+        } catch (\Exception $e) {
+            Log::error('Error en update:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Error interno del servidor'], 500);
+        }
+    }
+
     public function updateStatus(Request $request, Cedis $cedis)
     {
-        // Verificar permisos (solo admin)
-        if (Auth::user()->rol_id != 1) {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
+        $this->checkAdminPermission();
 
         $validator = Validator::make($request->all(), [
             'estatus' => 'required|in:activo,inactivo'
@@ -184,134 +250,14 @@ class CedisController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
-    {
-        // Verificar permisos (solo admin)
-        if (Auth::user()->rol_id != 1) {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
-
-        try {
-            $cedis = Cedis::find($id);
-
-            if (!$cedis) {
-                return response()->json(['error' => 'CEDIS no encontrado'], 404);
-            }
-
-            $validator = Validator::make($request->all(), [
-                'nombre' => 'required|string|max:100',
-                // ELIMINADA LA VALIDACIÓN DE CÓDIGO
-                'direccion' => 'nullable|string',
-                'telefono' => 'nullable|string|max:20',
-                'responsable' => 'nullable|string|max:100',
-                'region_id' => 'required|exists:regiones,id',
-                'estatus' => 'required|in:activo,inactivo',
-                'ingeniero_id' => 'nullable|exists:users,id'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
-            }
-
-            // Actualizar manualmente campo por campo (SIN CÓDIGO)
-            $cedis->nombre = $request->nombre;
-            // ELIMINADA LA ASIGNACIÓN DE CÓDIGO
-            $cedis->direccion = $request->direccion;
-            $cedis->telefono = $request->telefono;
-            $cedis->responsable = $request->responsable;
-            $cedis->region_id = $request->region_id;
-            $cedis->estatus = $request->estatus;
-            $cedis->ingeniero_id = $request->ingeniero_id;
-
-            $cedis->save();
-
-            return response()->json([
-                'message' => 'CEDIS actualizado correctamente',
-                'cedis' => $cedis
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error en update:', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Error interno del servidor: ' . $e->getMessage()], 500);
-        }
-    }
-
-    public function edit($id)
-    {
-        // Verificar permisos (solo admin)
-        if (Auth::user()->rol_id != 1) {
-            abort(403, 'No tienes permisos para realizar esta acción');
-        }
-
-        $cedis = Cedis::findOrFail($id);
-        $regiones = Region::where('estatus', 'activo')->get();
-        $ingenieros = User::where('rol_id', 4)
-            ->where('estatus', 1)
-            ->orderBy('nombre')
-            ->get(['id', 'numero_nomina', 'nombre', 'apellido']);
-
-        return view('cedis.modals.edit', compact('cedis', 'regiones', 'ingenieros', 'id'));
-    }
-
-    public function create()
-    {
-        // Verificar permisos (solo admin)
-        if (Auth::user()->rol_id != 1) {
-            abort(403, 'No tienes permisos para realizar esta acción');
-        }
-
-        $regiones = Region::where('estatus', 'activo')->get();
-        $ingenieros = User::where('rol_id', 4)
-            ->where('estatus', 1)
-            ->orderBy('nombre')
-            ->get(['id', 'numero_nomina', 'nombre', 'apellido']);
-
-        return view('cedis.modals.create', compact('regiones', 'ingenieros'));
-    }
-
-    public function store(Request $request)
-    {
-        // Verificar permisos (solo admin)
-        if (Auth::user()->rol_id != 1) {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
-
-        try {
-            $validator = Validator::make($request->all(), [
-                'nombre' => 'required|string|max:100',
-                'direccion' => 'nullable|string',
-                'telefono' => 'nullable|string|max:20',
-                'responsable' => 'nullable|string|max:100',
-                'region_id' => 'required|exists:regiones,id',
-                'estatus' => 'required|in:activo,inactivo',
-                'ingeniero_id' => 'nullable|exists:users,id'
-            ]);
-
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            $cedis = Cedis::create($request->all());
-
-            return redirect()->route('cedis.index')
-                ->with('success', 'CEDIS creado correctamente');
-        } catch (\Exception $e) {
-            Log::error('Error al crear CEDIS: ' . $e->getMessage());
-            return back()->with('error', 'Error al crear el CEDIS: ' . $e->getMessage())->withInput();
-        }
-    }
-
-    // En CedisController.php
     public function destroy($id)
     {
-        // Verificar permisos (solo admin)
-        if (Auth::user()->rol_id != 1) {
-            return response()->json(['error' => 'No autorizado'], 403);
-        }
+        $this->checkAdminPermission();
 
         try {
             $cedis = Cedis::findOrFail($id);
 
-            // Verificar si el CEDIS tiene tickets asociados
+            // Verificar dependencias
             if ($cedis->tickets()->exists()) {
                 return response()->json([
                     'error' => 'No se puede eliminar el CEDIS porque tiene tickets asociados'
@@ -323,7 +269,7 @@ class CedisController extends Controller
             return response()->json([
                 'message' => 'CEDIS eliminado correctamente'
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'CEDIS no encontrado'], 404);
         } catch (\Exception $e) {
             Log::error('Error al eliminar CEDIS: ' . $e->getMessage());
@@ -331,9 +277,15 @@ class CedisController extends Controller
         }
     }
 
-    // En UserController.php
-    public function getUserJson(User $user)
+    /**
+     * Métodos auxiliares
+     */
+    private function getIngenieros()
     {
-        return response()->json($user);
+        return User::where('rol_id', 4)
+            ->where('estatus', 1)
+            ->with('rol')
+            ->orderBy('nombre')
+            ->get(['id', 'numero_nomina', 'nombre', 'apellido', 'rol_id']);
     }
 }

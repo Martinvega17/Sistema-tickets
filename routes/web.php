@@ -109,6 +109,7 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
         Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
         Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
+        
     });
 
     // Ruta show para todos los usuarios con rol 1,2

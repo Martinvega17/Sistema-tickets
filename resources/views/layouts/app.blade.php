@@ -46,10 +46,12 @@
             box-shadow: 0 4px 12px rgba(0, 75, 147, 0.15);
         }
     </style>
+    @yield('styles')
 </head>
 
 <body class="flex h-screen bg-gray-100">
     <!-- Sidebar -->
+    
     <div class="flex flex-col w-64 pepsi-gradient text-white">
         <div class="flex items-center justify-center h-20 border-b border-blue-700 p-4">
             <div class="flex items-center space-x-3">

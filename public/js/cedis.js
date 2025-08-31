@@ -346,11 +346,13 @@ function showError(message) {
 }
 
 // Inicializar la aplicación
+// Inicializar cuando el DOM esté listo
 function initApp() {
     // Solo inicializar si estamos en la página index
     const cedisTable = document.getElementById('cedisTableBody');
     if (!cedisTable) return;
 
+    console.log('Inicializando aplicación CEDIS...');
     loadRegions();
     loadCedis();
 
@@ -404,6 +406,13 @@ function initApp() {
             closeModal('deleteCedisModal');
         }
     });
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
 
 // Inicializar cuando el DOM esté listo
