@@ -20,13 +20,25 @@ class Cedis extends Model
         'ingeniero_id'
     ];
 
+    // Relación con Region
     public function region()
     {
-        return $this->belongsTo(Region::class);
+        return $this->belongsTo(Region::class, 'region_id');
     }
 
+    // Relación con User (ingeniero)
     public function ingeniero()
     {
         return $this->belongsTo(User::class, 'ingeniero_id');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
     }
 }
