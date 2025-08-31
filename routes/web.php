@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CedisController;
+
 use App\Models\Cedis;
 use Illuminate\Support\Facades\Route;
 
@@ -94,4 +96,28 @@ Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
 });
 
+// Rutas para gestión de CEDIS
+Route::middleware(['auth', 'role:1,2'])->group(function () {
+    Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
+    Route::get('/cedis/data', [CedisController::class, 'getCedisData'])->name('cedis.data');
 
+    // Rutas solo para administradores
+    Route::middleware(['role:1'])->group(function () {
+        Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
+        Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
+        Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
+        Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
+        Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
+        Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
+    });
+
+    // Ruta show para todos los usuarios con rol 1,2
+    Route::get('/cedis/{cedis}', [CedisController::class, 'show'])->name('cedis.show');
+});
+
+// API para regiones
+Route::get('/api/regiones', function () {
+    return response()->json(
+        \App\Models\Region::where('estatus', 'activo')->get(['id', 'nombre'])
+    );
+});

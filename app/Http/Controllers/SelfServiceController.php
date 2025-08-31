@@ -15,7 +15,7 @@ class SelfServiceController extends Controller
                 'categoria' => 'Hardware'
             ],
             [
-                'titulo' => 'Como levantar un ticket (EXCLUSIVO PARA C.R)',
+                'titulo' => 'Como levantar un ticket (EXCLUSIVO PARA CAT)',
                 'categoria' => 'Procedimientos'
             ],
             [

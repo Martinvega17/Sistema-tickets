@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard - Sistema de Tickets Pepsi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -78,7 +79,7 @@
                 </svg>
                 Tickets
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
+            <a href="/cedis" class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
