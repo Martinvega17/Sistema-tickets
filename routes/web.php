@@ -7,6 +7,7 @@ use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CedisController;
 use App\Http\Controllers\ConocimientoController;
+use App\Http\Controllers\KnowledgeBaseController;
 
 use App\Models\Cedis;
 use Illuminate\Support\Facades\Route;
@@ -124,6 +125,12 @@ Route::get('/api/regiones', function () {
     );
 });
 
-// Rutas para la Base de Conocimiento
+
 // Ruta para la página de conocimiento
 Route::get('/conocimiento', [ConocimientoController::class, 'index'])->name('conocimiento.index');
+
+
+Route::get('/knowledgebase/article/{id}', [KnowledgeBaseController::class, 'show'])->name('knowledgebase.article');
+Route::get('/knowledgebase/article/{id}/edit', [KnowledgeBaseController::class, 'edit'])->name('knowledgebase.edit');
+Route::delete('/knowledgebase/article/{id}', [KnowledgeBaseController::class, 'destroy'])->name('knowledgebase.destroy');
+

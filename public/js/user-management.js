@@ -65,7 +65,6 @@ document.getElementById('userSearch').addEventListener('input', function (e) {
 });
 
 // Enviar formulario
-// Enviar formulario
 document.getElementById('userForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -79,17 +78,26 @@ document.getElementById('userForm').addEventListener('submit', async function (e
     if (!data.nueva_password) {
         delete data.nueva_password;
         delete data.nueva_password_confirmation;
+    } else {
+        // Validar que las contraseñas coincidan
+        if (data.nueva_password !== data.nueva_password_confirmation) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
     }
 
     try {
         const response = await fetch(`/usuarios/${userId}`, {
-            method: 'PUT',
+            method: 'POST', // Cambiado a POST para Laravel
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                ...data,
+                _method: 'PUT' // Laravel necesita esto para simular PUT
+            })
         });
 
         const result = await response.json();
@@ -99,16 +107,22 @@ document.getElementById('userForm').addEventListener('submit', async function (e
             // Limpiar campos de contraseña
             document.getElementById('nueva_password').value = '';
             document.getElementById('nueva_password_confirmation').value = '';
+
+            // Recargar la lista de usuarios para reflejar cambios
+            location.reload();
         } else {
             if (result.errors) {
-                alert('Error: ' + Object.values(result.errors).join(', '));
+                const errorMessages = Object.values(result.errors).flat().join(', ');
+                alert('Error: ' + errorMessages);
+            } else if (result.message) {
+                alert('Error: ' + result.message);
             } else {
                 alert('Error al actualizar el usuario');
             }
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al actualizar el usuario');
+        alert('Error de conexión al actualizar el usuario');
     }
 });
 
