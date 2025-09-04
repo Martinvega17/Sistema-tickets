@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-pepsi-blue">HelpPeople</h1>
+
         <p class="text-gray-600 mt-2">Autogestiona todas las solicitudes y consulta la librería de soluciones</p>
     </div>
 

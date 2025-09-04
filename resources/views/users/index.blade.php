@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('title')
+    Gestión de Usuarios
+@endsection
+
+
 @section('content')
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-pepsi-blue">Gestión de Usuarios</h1>

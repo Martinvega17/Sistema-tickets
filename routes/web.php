@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CedisController;
+use App\Http\Controllers\ConocimientoController;
 
 use App\Models\Cedis;
 use Illuminate\Support\Facades\Route;
@@ -109,7 +110,7 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
         Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
         Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
-        
+
     });
 
     // Ruta show para todos los usuarios con rol 1,2
@@ -122,3 +123,7 @@ Route::get('/api/regiones', function () {
         \App\Models\Region::where('estatus', 'activo')->get(['id', 'nombre'])
     );
 });
+
+// Rutas para la Base de Conocimiento
+// Ruta para la página de conocimiento
+Route::get('/conocimiento', [ConocimientoController::class, 'index'])->name('conocimiento.index');
