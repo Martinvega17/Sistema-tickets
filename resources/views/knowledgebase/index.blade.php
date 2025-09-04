@@ -3,7 +3,7 @@
 @section('content')
 
 @section('title')
-    Base de Conocimientos
+    Crear Articulo - Base de Conocimientos
 @endsection
 
 <div class="flex">
@@ -126,7 +126,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach ($articles as $article)
+                        @forelse ($articles as $article)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $article->title }}</div>
@@ -148,7 +148,7 @@
                                     <a href="{{ route('knowledgebase.article', $article->id) }}"
                                         class="text-blue-600 hover:text-blue-900 mr-3">Ver</a>
 
-                                    @if (in_array(Auth::user()->role_id, [1, 2, 3]))
+                                    @if (in_array(Auth::user()->rol_id, [1, 2, 3]))
                                         <a href="{{ route('knowledgebase.edit', $article->id) }}"
                                             class="text-green-600 hover:text-green-900 mr-3">Editar</a>
                                         <form action="{{ route('knowledgebase.destroy', $article->id) }}" method="POST"
@@ -163,13 +163,26 @@
                                     @endif
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    No hay artículos disponibles.
+                                    @if (in_array(Auth::user()->rol_id, [1, 2, 3]))
+                                        <a href="{{ route('knowledgebase.create') }}"
+                                            class="text-blue-600 hover:text-blue-900 ml-2">
+                                            Crear primer artículo
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
 
 <style>
     .bg-purple-100 {

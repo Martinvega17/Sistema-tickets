@@ -8,32 +8,17 @@ use Illuminate\Auth\Access\Response;
 
 class KnowledgeArticlePolicy
 {
-    /**
-     * Determine whether the user can update the article.
-     */
     public function update(User $user, KnowledgeArticle $article)
     {
         return $user->id === $article->user_id
             ? Response::allow()
             : Response::deny('No tienes permisos para editar este artículo');
     }
-    /**
-     * Determine whether the user can delete the article.
-     */
+
     public function delete(User $user, KnowledgeArticle $article)
     {
         return $user->id === $article->user_id
             ? Response::allow()
             : Response::deny('No tienes permisos para eliminar este artículo');
-    }
-
-
-    /**
-     * Determine whether the user can create articles.
-     */
-    public function create(User $user): bool
-    {
-        // Solo administradores (1), supervisores (2) y coordinadores (3) pueden crear
-        return in_array($user->role_id, [1, 2, 3]);
     }
 }

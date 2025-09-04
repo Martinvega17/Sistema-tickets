@@ -130,7 +130,21 @@ Route::get('/api/regiones', function () {
 Route::get('/conocimiento', [ConocimientoController::class, 'index'])->name('conocimiento.index');
 
 
-Route::get('/knowledgebase/article/{id}', [KnowledgeBaseController::class, 'show'])->name('knowledgebase.article');
-Route::get('/knowledgebase/article/{id}/edit', [KnowledgeBaseController::class, 'edit'])->name('knowledgebase.edit');
-Route::delete('/knowledgebase/article/{id}', [KnowledgeBaseController::class, 'destroy'])->name('knowledgebase.destroy');
+Route::get('/knowledgebase', [KnowledgeBaseController::class, 'index'])->name('knowledgebase.index');
+Route::get('/knowledgebase/create', [KnowledgeBaseController::class, 'create'])->name('knowledgebase.create');
+Route::post('/knowledgebase', [KnowledgeBaseController::class, 'store'])->name('knowledgebase.store');
+Route::get('/knowledge/{id}', [ConocimientoController::class, 'show'])
+    ->name('knowledgebase.article');
+
+Route::get('/knowledgebase/{id}/edit', [KnowledgeBaseController::class, 'edit'])->name('knowledgebase.edit');
+Route::put('/knowledgebase/{id}', [KnowledgeBaseController::class, 'update'])->name('knowledgebase.update');
+Route::delete('/knowledgebase/{id}', [KnowledgeBaseController::class, 'destroy'])->name('knowledgebase.destroy');
+Route::get('/knowledgebase/{id}/download', [KnowledgeBaseController::class, 'downloadPdf'])->name('knowledgebase.download');
+
+
+Route::get('/knowledge/{id}', [ConocimientoController::class, 'show'])
+    ->name('knowledgebase.article');
+
+Route::resource('knowledgebase', KnowledgeBaseController::class);
+// O específicamente para crear:
 

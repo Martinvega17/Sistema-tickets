@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 use App\Models\KnowledgeArticle;
 use App\Policies\KnowledgeArticlePolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,13 +12,8 @@ class AuthServiceProvider extends ServiceProvider
         KnowledgeArticle::class => KnowledgeArticlePolicy::class,
     ];
 
-    public function boot(): void
+    public function boot()
     {
         $this->registerPolicies();
-
-        // Definir gate adicional para verificar si el usuario puede ver botones de edición
-        Gate::define('manage-knowledge', function (User $user) {
-            return in_array($user->role_id, [1, 2, 3]);
-        });
     }
 }

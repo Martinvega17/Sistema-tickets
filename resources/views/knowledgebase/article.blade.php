@@ -5,221 +5,211 @@
     {{ $article->title }} - Base de Conocimientos
 @endsection
 
-<div class="flex">
-    <!-- Main Content -->
-    <div class="w-full p-6">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <nav class="flex mb-2" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="{{ route('knowledgebase.index') }}"
-                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                                <i class="fas fa-home mr-2"></i>
-                                Base de Conocimiento
-                            </a>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                                <span
-                                    class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{{ $article->title }}</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-                <h1 class="text-2xl font-bold text-gray-800">{{ $article->title }}</h1>
-                <p class="text-gray-600">Actualizado: {{ $article->updated_at->format('d/m/Y') }}</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                @can('update', $article)
-                    <a href="{{ route('knowledgebase.edit', $article->id) }}"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center">
-                        <i class="fas fa-edit mr-2"></i> Editar
-                    </a>
-                @endcan
-
-                @can('delete', $article)
-                    <form action="{{ route('knowledgebase.destroy', $article->id) }}" method="POST"
-                        onsubmit="return confirm('¿Estás seguro de que quieres eliminar este artículo?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center">
-                            <i class="fas fa-trash mr-2"></i> Eliminar
-                        </button>
-                    </form>
-                @endcan
-
-                <div class="relative">
-                    <img src="https://ui-avatars.com/api/?name=Martín&background=0066CC&color=fff" alt="Usuario"
-                        class="w-10 h-10 rounded-full">
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="header-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">Base de Conocimientos</h1>
+                    <p class="text-indigo-100">Sistema de gestión de artículos</p>
                 </div>
+                <nav>
+                    <ul class="flex space-x-4">
+                        <li><a href="#" class="hover:text-indigo-200 transition"><i class="fas fa-home mr-1"></i>
+                                Inicio</a></li>
+                        <li><a href="#" class="hover:text-indigo-200 transition"><i class="fas fa-book mr-1"></i>
+                                Artículos</a></li>
+                        <li><a href="#" class="hover:text-indigo-200 transition"><i class="fas fa-user mr-1"></i>
+                                Mi Cuenta</a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
+    </header>
 
-        <!-- Contenido principal -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <div class="flex items-center space-x-3">
-                    <span class="px-3 py-1 {{ $article->category->color_class }} text-xs font-medium rounded-full">
-                        {{ $article->category->name }}
-                    </span>
-                    <div class="flex items-center text-sm text-gray-500">
-                        <i class="far fa-eye mr-1"></i> {{ $article->views }}
-                        <div class="flex items-center ml-3">
-                            <i class="far fa-thumbs-up mr-1"></i>
-                            <span>{{ $article->rating }}%</span>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header del formulario -->
+                <div class="bg-indigo-600 text-white px-8 py-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold">Crear Nuevo Artículo</h2>
+                            <p class="text-indigo-100">Agrega un nuevo artículo a la base de conocimientos</p>
                         </div>
-                    </div>
-                </div>
-
-                @if ($article->pdf_path)
-                    <a href="{{ route('knowledgebase.download.pdf', $article->id) }}"
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center">
-                        <i class="fas fa-file-pdf mr-2"></i> Descargar PDF
-                    </a>
-                @endif
-            </div>
-
-            <div class="prose max-w-none mb-6">
-                {!! $article->content !!}
-            </div>
-
-            <!-- Sección de archivo PDF (si existe) -->
-            @if ($article->pdf_path)
-                <div class="mt-8 border-t pt-6">
-                    <h3 class="text-lg font-semibold mb-4">Documentación Adjunta</h3>
-                    <div class="bg-gray-50 p-4 rounded-lg flex items-center">
-                        <div class="mr-4 text-red-600 text-3xl">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <p class="font-medium">Manual: {{ $article->title }}</p>
-                            <p class="text-sm text-gray-600">PDF -
-                                {{ round(Storage::size($article->pdf_path) / 1024) }} KB</p>
-                        </div>
-                        <a href="{{ route('knowledgebase.download.pdf', $article->id) }}"
-                            class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
-                            <i class="fas fa-download mr-1"></i> Descargar
+                        <a href="#"
+                            class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg transition flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i> Volver
                         </a>
                     </div>
                 </div>
-            @endif
 
-            <!-- Valoración del artículo -->
-            <div class="mt-8 border-t pt-6">
-                <h3 class="text-lg font-semibold mb-4">¿Te resultó útil este artículo?</h3>
-                <div class="flex space-x-2">
-                    <button class="px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 feedback-btn"
-                        data-article-id="{{ $article->id }}" data-helpful="1">
-                        <i class="far fa-thumbs-up mr-2"></i> Sí
-                    </button>
-                    <button class="px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 feedback-btn"
-                        data-article-id="{{ $article->id }}" data-helpful="0">
-                        <i class="far fa-thumbs-down mr-2"></i> No
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Artículos relacionados -->
-        <div class="mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Artículos Relacionados</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @foreach ($relatedArticles as $related)
-                    <div class="bg-white rounded-lg shadow overflow-hidden transition duration-300 hover:shadow-md">
-                        <div class="p-5">
-                            <div class="flex justify-between items-start mb-3">
-                                <span
-                                    class="px-3 py-1 {{ $related->category->color_class }} text-xs font-medium rounded-full">
-                                    {{ $related->category->name }}
-                                </span>
-                                <i class="far fa-bookmark text-gray-400 hover:text-blue-500 cursor-pointer"></i>
+                <!-- Formulario -->
+                <div class="px-8 py-6">
+                    <!-- Mensaje de error si existe -->
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400 text-xl"></i>
                             </div>
-                            <h3 class="font-semibold text-lg mb-2">
-                                <a href="{{ route('knowledgebase.article', $related->id) }}"
-                                    class="hover:text-blue-600">
-                                    {{ $related->title }}
-                                </a>
-                            </h3>
-                            <p class="text-gray-600 text-sm mb-4">{{ Str::limit($related->summary, 100) }}</p>
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="far fa-eye mr-1"></i> {{ $related->views }}
-                                <i class="far fa-thumbs-up ml-3 mr-1"></i> {{ $related->rating }}%
+                            <div class="ml-3">
+                                <p class="text-red-700 font-medium">Error de envío de formulario</p>
+                                <p class="text-red-600 mt-1">El método POST no está soportado para la ruta
+                                    knowledgebase/create. Utiliza la ruta correcta.</p>
                             </div>
                         </div>
                     </div>
-                @endforeach
+
+                    <form action="{{ route('knowledgebase.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Título
+                                    *</label>
+                                <input type="text" id="title" name="title"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    required placeholder="Ingresa el título del artículo">
+                            </div>
+
+                            <div>
+                                <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">Categoría
+                                    *</label>
+                                <select id="category_id" name="category_id"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    required>
+                                    <option value="">Selecciona una categoría</option>
+                                    <option value="1">Tecnología</option>
+                                    <option value="2">Desarrollo</option>
+                                    <option value="3">Diseño</option>
+                                    <option value="4">Soporte</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="author" class="block text-sm font-medium text-gray-700 mb-2">Autor
+                                    *</label>
+                                <input type="text" id="author" name="author"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    required placeholder="Nombre del autor">
+                                <p class="text-gray-500 text-xs mt-2">Ingresa el nombre completo del autor</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Archivo PDF
+                                    (Opcional)</label>
+                                <div class="flex items-center justify-center w-full">
+                                    <label for="pdf_path"
+                                        class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-200">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <i class="fas fa-file-pdf text-3xl text-red-500 mb-3"></i>
+                                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click para
+                                                    subir</span> o arrastra un archivo</p>
+                                            <p class="text-xs text-gray-500">PDF (MAX. 5MB)</p>
+                                        </div>
+                                        <input id="pdf_path" name="pdf_path" type="file" class="hidden"
+                                            accept=".pdf" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="content" class="block text-sm font-medium text-gray-700 mb-2">Contenido
+                                *</label>
+                            <textarea id="content" name="content" rows="12"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                required placeholder="Escribe el contenido del artículo aquí..."></textarea>
+                        </div>
+
+                        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                            <a href="#"
+                                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2.5 rounded-lg transition duration-200 flex items-center">
+                                <i class="fas fa-times mr-2"></i> Cancelar
+                            </a>
+                            <button type="submit"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg transition duration-200 flex items-center">
+                                <i class="fas fa-plus-circle mr-2"></i> Crear Artículo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Solución del problema -->
+            <div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-blue-600 text-white px-6 py-4">
+                    <h3 class="text-lg font-bold flex items-center">
+                        <i class="fas fa-lightbulb mr-2"></i> Solución al Error
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-4">
+                        El error "The POST method is not supported for route knowledgebase/create" ocurre porque el
+                        formulario está intentando enviar datos mediante POST a la ruta <code
+                            class="bg-gray-100 px-1 py-0.5 rounded">knowledgebase/create</code>, pero esta ruta solo
+                        acepta solicitudes GET.
+                    </p>
+
+                    <p class="text-gray-700 mb-4">
+                        Según las rutas definidas, la ruta correcta para almacenar un nuevo artículo es:
+                    </p>
+
+                    <div class="code-block text-white mb-4">
+                        <span class="text-blue-400">Route::</span><span class="text-yellow-400">post</span>(<span
+                            class="text-green-400">'/knowledgebase'</span>, [KnowledgeBaseController::<span
+                            class="text-yellow-400">class</span>, <span class="text-green-400">'store'</span>])-><span
+                            class="text-yellow-400">name</span>(<span
+                            class="text-green-400">'knowledgebase.store'</span>);
+                    </div>
+
+                    <p class="text-gray-700 mb-4">
+                        Para solucionar el problema, debes cambiar la acción del formulario para que apunte a la ruta
+                        correcta:
+                    </p>
+
+                    <div class="code-block text-white mb-4">
+                        &lt;form action="{{ route('knowledgebase.store') }}" method="POST"
+                        enctype="multipart/form-data"&gt;
+                    </div>
+
+                    <p class="text-gray-700">
+                        Esta modificación dirige el envío del formulario a la ruta correcta que acepta solicitudes POST
+                        para almacenar nuevos artículos.
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2023 Base de Conocimientos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
 </div>
 
-<style>
-    .bg-purple-100 {
-        background-color: #f3e8ff;
-    }
-
-    .text-purple-800 {
-        color: #6b21a8;
-    }
-
-    .bg-green-100 {
-        background-color: #dcfce7;
-    }
-
-    .text-green-800 {
-        color: #166534;
-    }
-
-    .bg-red-100 {
-        background-color: #fee2e2;
-    }
-
-    .text-red-800 {
-        color: #991b1b;
-    }
-
-    .bg-blue-100 {
-        background-color: #dbeafe;
-    }
-
-    .text-blue-800 {
-        color: #1e40af;
-    }
-</style>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Manejar la valoración del artículo
-        document.querySelectorAll('.feedback-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const articleId = this.dataset.articleId;
-                const helpful = this.dataset.helpful;
+    // Mostrar el nombre del archivo seleccionado
+    document.getElementById('pdf_path').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        const label = document.querySelector('label[for="pdf_path"]');
 
-                fetch('/knowledgebase/article/' + articleId + '/feedback', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            helpful: helpful
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('¡Gracias por tu feedback!');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            });
-        });
+        if (fileName) {
+            label.querySelector('p:first-child').innerHTML = `<span class="font-semibold">${fileName}</span>`;
+            label.querySelector('p:last-child').textContent = "Haz clic para cambiar el archivo";
+        }
+    });
+
+    // Simular envío de formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Formulario enviado correctamente a la ruta: {{ route('knowledgebase.store') }}');
     });
 </script>
 @endsection

@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="p-4 bg-yellow-200">
+        <strong>Debug Usuario:</strong>
+        {{ Auth::user() ? Auth::user()->name . ' - Rol: ' . Auth::user()->role_id : 'No hay usuario logueado' }}
+    </div>
+
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
             Hola, <span class="text-pepsi-blue">{{ Auth::user()->nombre }}</span>!

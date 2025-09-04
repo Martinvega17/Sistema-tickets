@@ -1,58 +1,38 @@
 <?php
-
+// app/Models/KnowledgeArticle.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\KnowledgeCategory;
+use App\Models\KnowledgeAttachment;
 
 class KnowledgeArticle extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         'title',
         'content',
-        'summary',
         'category_id',
-        'author_id',
+        'user_id',
+        'author',
         'views',
-        'rating',
-        'pdf_path' // Añadir este campo para el PDF
-    ];
-
-    protected $casts = [
-        'rating' => 'decimal:2'
+        'rating'
     ];
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function author()
-    {
-        return $this->belongsTo(User::class, 'author_id');
+        return $this->belongsTo(KnowledgeCategory::class, 'category_id');
     }
 
     public function attachments()
     {
-        return $this->hasMany(Attachment::class);
+        return $this->hasMany(KnowledgeAttachment::class, 'article_id');
     }
 
-    // Método para verificar si tiene PDF
-    public function hasPdf()
+    public function user()
     {
-        return !empty($this->pdf_path);
-    }
-
-    // Método para obtener artículos relacionados
-    public function relatedArticles($limit = 2)
-    {
-        return self::where('category_id', $this->category_id)
-            ->where('id', '!=', $this->id)
-            ->orderBy('views', 'desc')
-            ->limit($limit)
-            ->get();
+        return $this->belongsTo(User::class);
     }
 }

@@ -10,13 +10,17 @@ return new class extends Migration
     {
         Schema::create('knowledge_attachments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('article_id')->constrained('knowledge_articles')->onDelete('cascade');
+            $table->unsignedBigInteger('article_id'); // sin FK
             $table->string('original_name');
             $table->string('path');
             $table->integer('size');
             $table->string('mime_type');
             $table->enum('type', ['pdf', 'image', 'document', 'other'])->default('other');
             $table->timestamps();
+        });
+
+        Schema::table('knowledge_attachments', function (Blueprint $table) {
+            $table->foreign('article_id')->references('id')->on('knowledge_articles')->onDelete('cascade');
         });
     }
 
