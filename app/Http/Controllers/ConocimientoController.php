@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\KnowledgeArticle;
 
 class ConocimientoController extends Controller
 {
     public function index()
     {
-        // Aquí puedes agregar lógica para obtener artículos de conocimiento si es necesario
-        return view('conocimiento');
+        $articles = KnowledgeArticle::with('category')->orderBy('created_at', 'desc')->get();
+        return view('conocimiento', compact('articles'));
     }
 }
