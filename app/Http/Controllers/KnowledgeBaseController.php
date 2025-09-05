@@ -84,7 +84,7 @@ class KnowledgeBaseController extends Controller
         ]);
 
         // Agregar el user_id del usuario autenticado
-        $validated['user_id'] = auth()->id();
+        $validated['user_id'] = Auth::id();
 
         // Procesar el archivo PDF si se subió
         if ($request->hasFile('pdf_path')) {
@@ -93,7 +93,6 @@ class KnowledgeBaseController extends Controller
         }
 
         KnowledgeArticle::create($validated);
-
 
         return redirect()->route('knowledgebase.index')
             ->with('success', 'Artículo creado exitosamente');
@@ -104,7 +103,7 @@ class KnowledgeBaseController extends Controller
         $article = KnowledgeArticle::findOrFail($id);
 
         // Verificar autorización
-        if (!Auth::user()->can('update', $article)) {
+        if (!$this->authorize('update', $article)) {
             abort(403, 'No tienes permisos para editar este artículo');
         }
 
