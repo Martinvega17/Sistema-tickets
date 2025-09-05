@@ -127,7 +127,7 @@ Route::get('/api/regiones', function () {
 
 
 // Ruta para la página de conocimiento
-Route::get('/conocimiento', [ConocimientoController::class, 'index'])->name('conocimiento.index');
+Route::get('/knowledgebase/index', [ConocimientoController::class, 'index'])->name('knowledgebase.index');
 
 
 Route::get('/knowledgebase', [KnowledgeBaseController::class, 'index'])->name('knowledgebase.index');
@@ -147,4 +147,3 @@ Route::get('/knowledge/{id}', [ConocimientoController::class, 'show'])
 
 Route::resource('knowledgebase', KnowledgeBaseController::class);
 // O específicamente para crear:
-
