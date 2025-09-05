@@ -11,6 +11,6 @@ class ConocimientoController extends Controller
     {
 
         $articles = KnowledgeArticle::with('category')->orderBy('created_at', 'desc')->get();
-        return view('conocimiento', compact('articles'));
+        return view('knowledgebase/index', compact('articles'));
     }
 }

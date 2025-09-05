@@ -14,8 +14,21 @@ class KnowledgeBaseController extends Controller
     // ✅ AÑADE ESTE MÉTODO QUE FALTA
     public function index()
     {
+        // Obtener todos los artículos para la tabla
         $articles = KnowledgeArticle::with('category')->latest()->get();
-        return view('knowledgebase.index', compact('articles'));
+
+        // Obtener artículos destacados (los 3 más recientes con contenido)
+        $featuredArticles = KnowledgeArticle::with('category')
+            ->whereNotNull('content')
+            ->where('content', '!=', '')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        // Obtener todas las categorías para los filtros
+        $categories = KnowledgeCategory::where('is_active', true)->get();
+
+        return view('knowledgebase.index', compact('articles', 'featuredArticles', 'categories'));
     }
 
     public function show($id)

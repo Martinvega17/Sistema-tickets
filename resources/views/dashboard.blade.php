@@ -41,7 +41,7 @@
                     <p class="text-gray-600 text-sm mt-1">Documenta artículos disponibles para autogestión de usuarios</p>
                 </div>
             </div>
-            <a href="/conocimiento" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 mt-2">
+            <a href="/knowledgebase/index" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 mt-2">
                 <span>Explorar base de conocimiento</span>
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -134,15 +134,7 @@
     <!-- Sección de CEDIS (solo para Admin y Supervisor) -->
     @if (in_array(Auth::user()->rol_id, [1, 2]))
         <div class="mt-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-pepsi-blue">Gestión de CEDIS</h2>
-                <div class="mt-4 md:mt-0">
-                    <a href="{{ route('cedis.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-pepsi-blue text-white rounded-lg hover:bg-pepsi-dark-blue transition duration-150 ease-in-out">
-                        <i class="bi bi-plus-circle mr-2"></i> Nuevo CEDIS
-                    </a>
-                </div>
-            </div>
+
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Tarjeta de Gestión de CEDIS -->
