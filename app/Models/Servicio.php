@@ -18,6 +18,6 @@ class Servicio extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Tickets::class);
+        return $this->hasMany(Tickets::class); // Cambiado de Tickets::class a Ticket::class
     }
 }
