@@ -34,7 +34,7 @@ class Cedis extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class);
+        return $this->hasMany(Tickets::class);
     }
 
     public function users()
