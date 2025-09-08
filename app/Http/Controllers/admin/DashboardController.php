@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ticket;
+use App\Models\Tickets;
 use App\Models\User;
 use App\Models\Cedis;
 use App\Models\Area;
@@ -22,10 +22,10 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            'total_tickets' => Ticket::count(),
-            'tickets_abiertos' => Ticket::where('estatus', 'Abierto')->count(),
-            'tickets_en_progreso' => Ticket::where('estatus', 'En progreso')->count(),
-            'tickets_resueltos' => Ticket::where('estatus', 'Resuelto')->count(),
+            'total_tickets' => Tickets::count(),
+            'tickets_abiertos' => Tickets::where('estatus', 'Abierto')->count(),
+            'tickets_en_progreso' => Tickets::where('estatus', 'En progreso')->count(),
+            'tickets_resueltos' => Tickets::where('estatus', 'Resuelto')->count(),
             'total_usuarios' => User::count(),
             'total_cedis' => Cedis::where('estatus', 'activo')->count(),
             'total_areas' => Area::where('estatus', 'activo')->count(),
@@ -33,12 +33,12 @@ class DashboardController extends Controller
         ];
 
         // Tickets por estatus
-        $ticketsPorEstatus = Ticket::select('estatus', DB::raw('count(*) as total'))
+        $ticketsPorEstatus = Tickets::select('estatus', DB::raw('count(*) as total'))
             ->groupBy('estatus')
             ->get();
 
         // Tickets recientes
-        $ticketsRecientes = Ticket::with(['usuario', 'cedis'])
+        $ticketsRecientes = Tickets::with(['usuario', 'cedis'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
