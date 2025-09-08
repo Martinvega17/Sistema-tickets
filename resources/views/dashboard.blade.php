@@ -1,11 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="p-4 bg-yellow-200">
-        <strong>Debug Usuario:</strong>
-        {{ Auth::user() ? Auth::user()->name . ' - Rol: ' . Auth::user()->role_id : 'No hay usuario logueado' }}
-    </div>
-
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
             Hola, <span class="text-pepsi-blue">{{ Auth::user()->nombre }}</span>!
@@ -41,7 +36,7 @@
                     <p class="text-gray-600 text-sm mt-1">Documenta artículos disponibles para autogestión de usuarios</p>
                 </div>
             </div>
-            <a href="/knowledgebase/index" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 mt-2">
+            <a href="/knowledgebase/" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 mt-2">
                 <span>Explorar base de conocimiento</span>
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
