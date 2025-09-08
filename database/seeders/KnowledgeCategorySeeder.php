@@ -19,39 +19,19 @@ class KnowledgeCategorySeeder extends Seeder
                 'color' => 'gray',
             ],
             [
-                'name' => 'Tecnología',
+                'name' => 'Hardware',
                 'color' => 'blue',
             ],
             [
-                'name' => 'Recursos Humanos',
+                'name' => 'Software',
                 'color' => 'green',
             ],
             [
-                'name' => 'Finanzas',
+                'name' => 'Ciberseguridad',
                 'color' => 'purple',
             ],
             [
-                'name' => 'Marketing',
-                'color' => 'red',
-            ],
-            [
-                'name' => 'Operaciones',
-                'color' => 'yellow',
-            ],
-            [
-                'name' => 'Legal',
-                'color' => 'purple',
-            ],
-            [
-                'name' => 'Clientes',
-                'color' => 'blue',
-            ],
-            [
-                'name' => 'Procedimientos',
-                'color' => 'green',
-            ],
-            [
-                'name' => 'FAQ',
+                'name' => 'Soporte',
                 'color' => 'red',
             ],
         ];
