@@ -2,16 +2,19 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CedisController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\TicketsController;
+use App\Http\Controllers\Admin\AreaController;
+use App\Http\Controllers\Admin\ServicioController;
+use App\Http\Controllers\Admin\NaturalezaController;
+use App\Http\Controllers\Admin\TipoNaturalezaController;
 use App\Models\Cedis;
 use App\Models\Region;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin;
 
 
 // Redirección principal
@@ -128,10 +131,10 @@ Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByAr
 Route::get('/api/tipos-naturaleza/{naturaleza}', [TicketsController::class, 'getTiposByNaturaleza']);
 
 
-
-// ... otros controllers
-
-// Grupo de rutas administrativas
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('areas', AreaController::class);
+    Route::resource('servicios', ServicioController::class);
+    Route::resource('naturalezas', NaturalezaController::class);
+    Route::resource('tipo-naturalezas', TipoNaturalezaController::class);
 });
