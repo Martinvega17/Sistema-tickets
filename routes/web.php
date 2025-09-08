@@ -6,46 +6,28 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CedisController;
-use App\Http\Controllers\ConocimientoController;
 use App\Http\Controllers\KnowledgeBaseController;
-
 use App\Models\Cedis;
+use App\Models\Region;
 use Illuminate\Support\Facades\Route;
 
 // Redirección principal
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::redirect('/', '/login');
 
-// Rutas de autenticación
+// Rutas de autenticación (solo para invitados)
 Route::middleware('guest')->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login']);
+    Route::controller(LoginController::class)->group(function () {
+        Route::get('login', 'showLoginForm')->name('login');
+        Route::post('login', 'login');
+    });
 
-    Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('register', [RegisterController::class, 'register']);
+    Route::controller(RegisterController::class)->group(function () {
+        Route::get('register', 'showRegistrationForm')->name('register');
+        Route::post('register', 'register');
+    });
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-});
-
-// routes/web.php
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-
-// Rutas protegidas (requieren autenticación)
-Route::middleware('auth')->group(function () {
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
-
-// Rutas para datos de CEDIS (accesibles sin autenticación para el formulario de registro)
+// Rutas para datos públicos (sin autenticación)
 Route::get('/get-cedis', function () {
     $cedis = Cedis::where('estatus', 'activo')
         ->orderBy('nombre')
@@ -54,7 +36,6 @@ Route::get('/get-cedis', function () {
     return response()->json($cedis);
 });
 
-// Ruta alternativa para obtener CEDIS por región
 Route::get('/cedis-por-region/{regionId}', function ($regionId) {
     $cedis = Cedis::where('region_id', $regionId)
         ->where('estatus', 'activo')
@@ -64,86 +45,75 @@ Route::get('/cedis-por-region/{regionId}', function ($regionId) {
     return response()->json($cedis);
 });
 
-// Ruta para Self Service (accesible sin autenticación)
-Route::get('/self-service', [SelfServiceController::class, 'index'])->name('self-service');
-
-// Rutas de usuarios
-Route::middleware(['auth'])->group(function () {
-    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
-    Route::put('/usuarios/{user}/estatus', [UserController::class, 'updateStatus'])->name('usuarios.estatus');
-    Route::put('/usuarios/{user}/password', [UserController::class, 'resetPassword'])->name('usuarios.password');
-    Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
-    Route::get('/user-json/{user}', [UserController::class, 'getUserJson'])->name('user.json');
-});
-
-// Rutas de usuarios
-Route::middleware(['auth'])->group(function () {
-    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
-    Route::get('/usuarios/editar', [UserController::class, 'edit'])->name('usuarios.edit');
-    Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
-});
-
-// En routes/web.php, dentro del grupo de autenticación
-Route::middleware(['auth', 'role:1,2,3'])->group(function () {
-    // Rutas existentes...
-    Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
-    Route::get('/usuarios/editar', [UserController::class, 'edit'])->name('usuarios.edit');
-
-    // ✅ AGREGAR ESTA RUTA (FALTANTE)
-    Route::get('/usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show');
-
-    // Rutas PUT existentes...
-    Route::put('/usuarios/{user}/estatus', [UserController::class, 'updateStatus'])->name('usuarios.estatus');
-    Route::put('/usuarios/{user}/password', [UserController::class, 'resetPassword'])->name('usuarios.password');
-    Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
-});
-
-// Rutas para gestión de CEDIS
-Route::middleware(['auth', 'role:1,2'])->group(function () {
-    Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
-    Route::get('/cedis/data', [CedisController::class, 'getCedisData'])->name('cedis.data');
-
-    // Rutas solo para administradores
-    Route::middleware(['role:1'])->group(function () {
-        Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
-        Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
-        Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
-        Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
-        Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
-        Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
-
-    });
-
-    // Ruta show para todos los usuarios con rol 1,2
-    Route::get('/cedis/{cedis}', [CedisController::class, 'show'])->name('cedis.show');
-});
-
-// API para regiones
 Route::get('/api/regiones', function () {
     return response()->json(
-        \App\Models\Region::where('estatus', 'activo')->get(['id', 'nombre'])
+        Region::where('estatus', 'activo')->get(['id', 'nombre'])
     );
 });
 
+// Ruta para Self Service (accesible sin autenticación)
+Route::get('/self-service', [SelfServiceController::class, 'index'])->name('self-service');
 
-// Ruta para la página de conocimiento
-Route::get('/knowledgebase/index', [ConocimientoController::class, 'index'])->name('knowledgebase.index');
+// Rutas protegidas (requieren autenticación)
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
+
+    // Usuarios
+    Route::controller(UserController::class)->group(function () {
+        Route::get('/usuarios', 'index')->name('usuarios.index');
+        Route::get('/usuarios/editar', 'edit')->name('usuarios.edit');
+        Route::put('/usuarios/{user}', 'update')->name('usuarios.update');
+        Route::get('/user-json/{user}', 'getUserJson')->name('user.json');
+    });
+
+    // Rutas de usuarios con restricción de roles
+    Route::middleware('role:1,2,3')->group(function () {
+        Route::controller(UserController::class)->group(function () {
+            Route::get('/usuarios/{user}', 'show')->name('usuarios.show');
+            Route::put('/usuarios/{user}/estatus', 'updateStatus')->name('usuarios.estatus');
+            Route::put('/usuarios/{user}/password', 'resetPassword')->name('usuarios.password');
+        });
+    });
+
+    // Rutas para gestión de CEDIS
+    Route::middleware(['auth', 'role:1,2'])->group(function () {
+        Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
+        Route::get('/cedis/data', [CedisController::class, 'getCedisData'])->name('cedis.data');
+
+        // Rutas solo para administradores
+        Route::middleware(['role:1'])->group(function () {
+            Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
+            Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
+            Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
+            Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
+            Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
+            Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
+
+        });
+
+        // Ruta show para todos los usuarios con rol 1,2
+
+    });
 
 
-Route::get('/knowledgebase', [KnowledgeBaseController::class, 'index'])->name('knowledgebase.index');
-Route::get('/knowledgebase/create', [KnowledgeBaseController::class, 'create'])->name('knowledgebase.create');
-Route::post('/knowledgebase', [KnowledgeBaseController::class, 'store'])->name('knowledgebase.store');
-Route::get('/knowledge/{id}', [ConocimientoController::class, 'show'])
-    ->name('knowledgebase.article');
+    // Base de Conocimiento - Todas las rutas en un resource
+    Route::prefix('knowledgebase')->controller(KnowledgeBaseController::class)->group(function () {
+        Route::get('/', 'index')->name('knowledgebase.index');
+        Route::get('/create', 'create')->name('knowledgebase.create');
+        Route::post('/', 'store')->name('knowledgebase.store');
+        Route::get('/{id}', 'show')->name('knowledgebase.article');
+        Route::get('/{id}/edit', 'edit')->name('knowledgebase.edit');
+        Route::put('/{id}', 'update')->name('knowledgebase.update');
+        Route::delete('/{id}', 'destroy')->name('knowledgebase.destroy');
+        Route::get('/{id}/download', 'downloadPdf')->name('knowledgebase.download');
+    });
 
-Route::get('/knowledgebase/{id}/edit', [KnowledgeBaseController::class, 'edit'])->name('knowledgebase.edit');
-Route::put('/knowledgebase/{id}', [KnowledgeBaseController::class, 'update'])->name('knowledgebase.update');
-Route::delete('/knowledgebase/{id}', [KnowledgeBaseController::class, 'destroy'])->name('knowledgebase.destroy');
-Route::get('/knowledgebase/{id}/download', [KnowledgeBaseController::class, 'downloadPdf'])->name('knowledgebase.download');
-
-
-Route::get('/knowledge/{id}', [ConocimientoController::class, 'show'])
-    ->name('knowledgebase.article');
-
-Route::resource('knowledgebase', KnowledgeBaseController::class);
-// O específicamente para crear:
+    // Alias para compatibilidad
+    Route::get('/knowledge/{id}', [KnowledgeBaseController::class, 'show'])
+        ->name('knowledgebase.article.alias');
+});
