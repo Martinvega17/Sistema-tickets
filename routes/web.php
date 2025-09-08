@@ -7,9 +7,12 @@ use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CedisController;
 use App\Http\Controllers\KnowledgeBaseController;
+use App\Http\Controllers\TicketsController;
 use App\Models\Cedis;
 use App\Models\Region;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin;
+
 
 // Redirección principal
 Route::redirect('/', '/login');
@@ -116,4 +119,19 @@ Route::middleware('auth')->group(function () {
     // Alias para compatibilidad
     Route::get('/knowledge/{id}', [KnowledgeBaseController::class, 'show'])
         ->name('knowledgebase.article.alias');
+});
+
+
+// Rutas para tickets
+Route::resource('tickets', TicketsController::class);
+Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
+Route::get('/api/tipos-naturaleza/{naturaleza}', [TicketsController::class, 'getTiposByNaturaleza']);
+
+
+
+// ... otros controllers
+
+// Grupo de rutas administrativas
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });

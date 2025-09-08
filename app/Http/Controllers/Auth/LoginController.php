@@ -41,7 +41,7 @@ class LoginController extends Controller
             // Redirigir según el rol
             switch ($user->rol_id) {
                 case 1:
-                    return redirect('/dashboard');
+                    return redirect('/admin/dashboard');
                 case 2:
                     return redirect('/dashboard');
                 case 3:
