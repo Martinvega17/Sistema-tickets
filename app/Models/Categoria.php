@@ -9,7 +9,12 @@ class Categoria extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'estatus'];
+    protected $fillable = ['nombre', 'estatus', 'naturaleza_id'];
+
+    public function naturaleza()
+    {
+        return $this->belongsTo(Naturaleza::class);
+    }
 
     public function tickets()
     {
