@@ -2,7 +2,7 @@
 
 @section('title', 'Dashboard Administrativo')
 
-@section('content')
+@section('content.dashboard')
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
             Panel de Administración
@@ -134,41 +134,47 @@
     </div>
 
     <!-- Acciones Rápidas -->
+    <!-- Acciones Rápidas -->
     <div class="bg-white rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Gestión de Catálogos</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="{{ route('admin.areas.create') }}"
+            <a href="{{ route('admin.areas.index') }}"
                 class="p-4 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
                 <svg class="w-8 h-8 text-pepsi-blue mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-4 0H9m4 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v10m4 0h4">
+                    </path>
                 </svg>
-                <span class="text-sm font-medium">Nueva Área</span>
+                <span class="text-sm font-medium">Áreas</span>
             </a>
 
-            <a href="{{ route('admin.categorias.create') }}"
+            <a href="{{ route('admin.servicios.index') }}"
                 class="p-4 bg-green-50 rounded-lg text-center hover:bg-green-100 transition-colors">
                 <svg class="w-8 h-8 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+                    </path>
                 </svg>
-                <span class="text-sm font-medium">Nueva Categoría</span>
+                <span class="text-sm font-medium">Servicios</span>
             </a>
 
-            <a href="{{ route('tickets.create') }}"
-                class="p-4 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
-                <svg class="w-8 h-8 text-orange-600 mx-auto mb-2" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                <span class="text-sm font-medium">Nuevo Ticket</span>
-            </a>
-
-            <a href="{{ route('usuarios.index') }}"
+            <a href="{{ route('admin.naturalezas.index') }}"
                 class="p-4 bg-purple-50 rounded-lg text-center hover:bg-purple-100 transition-colors">
                 <svg class="w-8 h-8 text-purple-600 mx-auto mb-2" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z">
+                    </path>
                 </svg>
-                <span class="text-sm font-medium">Gestión Usuarios</span>
+                <span class="text-sm font-medium">Naturalezas</span>
+            </a>
+
+            <a href="" class="p-4 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
+                <svg class="w-8 h-8 text-orange-600 mx-auto mb-2" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                </svg>
+                <span class="text-sm font-medium">Categorías</span>
             </a>
         </div>
     </div>
