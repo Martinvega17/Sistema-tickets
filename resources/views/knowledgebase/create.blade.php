@@ -61,11 +61,11 @@
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     required>
                                     <option value="">Selecciona una categoría</option>
-                                    <option value="1">Tecnología</option>
-                                    <option value="2">Desarrollo</option>
-                                    <option value="3">Diseño</option>
-                                    <option value="4">Soporte</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
                                 </select>
+
                             </div>
                         </div>
 
@@ -117,7 +117,7 @@
                 </div>
             </div>
 
-            
+
         </div>
     </main>
 

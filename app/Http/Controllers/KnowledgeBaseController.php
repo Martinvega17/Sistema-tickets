@@ -8,41 +8,52 @@ use App\Models\KnowledgeArticle;
 use App\Models\KnowledgeCategory;
 use Illuminate\Support\Facades\Auth;
 use App\Models\KnowledgeBase;
+use Illuminate\Support\Facades\View;
 
 class KnowledgeBaseController extends Controller
 {
     // ✅ AÑADE ESTE MÉTODO QUE FALTA
-    public function index()
-    {
-        // Obtener todos los artículos para la tabla
-        $articles = KnowledgeArticle::with('category')->latest()->get();
 
-        // Obtener artículos destacados (los 3 más recientes con contenido)
+    public function index(Request $request)
+    {
+        // Filtro de categoría
+        $query = KnowledgeArticle::with('category');
+
+        if ($request->has('category_id') && !empty($request->category_id)) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Artículos (para la tabla principal)
+        $articles = $query->latest()->get();
+
+        // Artículos destacados (últimos 3 con contenido)
         $featuredArticles = KnowledgeArticle::with('category')
             ->whereNotNull('content')
             ->where('content', '!=', '')
+            ->when($request->category_id, function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
+            })
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
 
-        // Obtener todas las categorías para los filtros
+        // Categorías activas
         $categories = KnowledgeCategory::where('is_active', true)->get();
 
         return view('knowledgebase.index', compact('articles', 'featuredArticles', 'categories'));
     }
 
+
     public function show($id)
     {
         $article = KnowledgeArticle::with(['category', 'author'])->findOrFail($id);
-
-        // Incrementar contador de visitas
         $article->increment('views');
-
-        // Obtener artículos relacionados
         $relatedArticles = $article->relatedArticles(2);
 
-        return view('knowledgebase.article', compact('article', 'relatedArticles'));
+        $categories = KnowledgeCategory::where('is_active', true)->get(); // <= si tu vista/partial lo usa
+        return view('knowledgebase.article', compact('article', 'relatedArticles', 'categories'));
     }
+
 
     public function edit($id)
     {
@@ -51,7 +62,7 @@ class KnowledgeBaseController extends Controller
 
 
         $categories = KnowledgeCategory::all(); // Añade esto si necesitas las categorías
-        return view('knowledgebase.edit', compact('article', 'categories'));
+        return view('Knowledgebase.edit', compact('article', 'categories'));
     }
 
     public function destroy($id)
@@ -90,7 +101,7 @@ class KnowledgeBaseController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:Knowledge_categories,id',
+            'category_id' => 'required|exists:knowledge_categories,id',
             'author' => 'required|string|max:255',
             'content' => 'required|string',
             'pdf_path' => 'nullable|file|mimes:pdf|max:5120',

@@ -23,22 +23,22 @@
     <div class="bg-white p-4 rounded-lg shadow mb-6">
         <div class="flex items-center space-x-4">
             <span class="font-medium text-gray-700">Filtrar por:</span>
-            <button
-                class="px-4 py-1 bg-pepsi-blue text-white rounded-full hover:bg-blue-700 transition-colors">Todos</button>
-            @if (isset($categories) && $categories->count() > 0)
-                @foreach ($categories as $category)
-                    <button
-                        class="px-4 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors category-filter"
-                        data-category="{{ $category->id }}">
-                        {{ $category->name }}
-                    </button>
-                @endforeach
-            @else
-                <button class="px-4 py-1 bg-gray-100 text-gray-700 rounded-full">General</button>
-                <button class="px-4 py-1 bg-gray-100 text-gray-700 rounded-full">Soporte Técnico</button>
-                <button class="px-4 py-1 bg-gray-100 text-gray-700 rounded-full">Software</button>
-            @endif
+
+            <!-- Botón TODOS -->
+            <a href="{{ route('knowledgebase.index') }}"
+                class="px-4 py-1 rounded-full transition-colors
+              {{ request('category_id') ? 'bg-gray-100 text-gray-700' : 'bg-pepsi-blue text-white' }}">
+                Todos
+            </a>
+
+            <!-- Botones por categoría -->
+            @foreach ($categories as $category)
+                <a href="{{ route('knowledgebase.index', ['category_id' => $category->id]) }}">
+                    {{ $category->name }}
+                </a>
+            @endforeach
         </div>
+
     </div>
 
     <!-- Artículos destacados - SOLUCIÓN PRINCIPAL -->
@@ -100,7 +100,8 @@
     <div>
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-gray-800">Todos los Artículos</h2>
-            <span class="text-sm text-gray-500">{{ isset($articles) ? $articles->count() : 0 }} artículos encontrados</span>
+            <span class="text-sm text-gray-500">{{ isset($articles) ? $articles->count() : 0 }} artículos
+                encontrados</span>
         </div>
 
         @if (isset($articles) && $articles->count() > 0)
