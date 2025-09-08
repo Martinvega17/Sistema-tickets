@@ -16,6 +16,10 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('naturalezas')
                 ->onDelete('set null');
+            $table->foreignId('servicio_id')
+                ->nullable()
+                ->constrained('servicios')
+                ->onDelete('set null');
             $table->timestamps();
         });
     }

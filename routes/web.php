@@ -11,7 +11,7 @@ use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Admin\NaturalezaController;
-use App\Http\Controllers\Admin\TipoNaturalezaController;
+use App\Http\Controllers\Admin\CategoriaController;
 use App\Models\Cedis;
 use App\Models\Region;
 use Illuminate\Support\Facades\Route;
@@ -128,13 +128,12 @@ Route::middleware('auth')->group(function () {
 // Rutas para tickets
 Route::resource('tickets', TicketsController::class);
 Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
-Route::get('/api/tipos-naturaleza/{naturaleza}', [TicketsController::class, 'getTiposByNaturaleza']);
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('areas', AreaController::class);
     Route::resource('servicios', ServicioController::class);
-    Route::resource('naturalezas', NaturalezaController::class);
-    Route::resource('tipo-naturalezas', TipoNaturalezaController::class);
+    Route::resource('naturaleza', NaturalezaController::class);
+    Route::resource('categorias', CategoriaController::class);
 });

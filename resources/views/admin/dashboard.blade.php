@@ -157,7 +157,7 @@
                 <span class="text-sm font-medium">Servicios</span>
             </a>
 
-            <a href="{{ route('admin.naturalezas.index') }}"
+            <a href="{{ route('admin.naturaleza.index') }}"
                 class="p-4 bg-purple-50 rounded-lg text-center hover:bg-purple-100 transition-colors">
                 <svg class="w-8 h-8 text-purple-600 mx-auto mb-2" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -165,10 +165,11 @@
                         d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z">
                     </path>
                 </svg>
-                <span class="text-sm font-medium">Naturalezas</span>
+                <span class="text-sm font-medium">Naturaleza</span>
             </a>
 
-            <a href="" class="p-4 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
+            <a href="{{ route('admin.categorias.index') }}"
+                class="p-4 bg-orange-50 rounded-lg text-center hover:bg-orange-100 transition-colors">
                 <svg class="w-8 h-8 text-orange-600 mx-auto mb-2" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

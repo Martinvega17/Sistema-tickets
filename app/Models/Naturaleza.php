@@ -9,13 +9,22 @@ class Naturaleza extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'estatus'];
+    // Especificar el nombre de la tabla
+    protected $table = 'naturalezas';
 
-    public function tipos()
+    // Campos que se pueden llenar masivamente
+    protected $fillable = [
+        'nombre',
+        'estatus'
+    ];
+
+    // Relación con categorías
+    public function categorias()
     {
-        return $this->hasMany(TipoNaturaleza::class);
+        return $this->hasMany(Categoria::class);
     }
 
+    // Agregar esta relación con tickets
     public function tickets()
     {
         return $this->hasMany(Tickets::class);
