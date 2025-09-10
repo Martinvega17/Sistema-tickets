@@ -9,16 +9,19 @@ class Categoria extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'estatus', 'naturaleza_id', 'servicio_id'];
+    // Solo estos campos, quitamos naturaleza_id y servicio_id
+    protected $fillable = ['nombre', 'estatus'];
 
-    public function naturaleza()
+    // Relación muchos a muchos con naturalezas
+    public function naturalezas()
     {
-        return $this->belongsTo(Naturaleza::class);
+        return $this->belongsToMany(Naturaleza::class, 'categoria_naturaleza');
     }
 
-    public function servicio()
+    // Relación muchos a muchos con servicios
+    public function servicios()
     {
-        return $this->belongsTo(Servicio::class);
+        return $this->belongsToMany(Servicio::class, 'categoria_servicio');
     }
 
     public function tickets()
