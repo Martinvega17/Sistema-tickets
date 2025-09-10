@@ -74,13 +74,13 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nombre
+                                    Categoria
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Naturaleza
+                                    Naturalezas
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Servicio
+                                    Servicios
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Estatus
@@ -95,24 +95,48 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($categorias as $categoria)
-                                <tr class="categoria-row" data-naturaleza="{{ $categoria->naturaleza_id }}"
-                                    data-servicio="{{ $categoria->servicio_id }}"
+                                <tr class="categoria-row"
+                                    data-naturalezas="{{ $categoria->naturalezas->pluck('id')->implode(',') }}"
+                                    data-servicios="{{ $categoria->servicios->pluck('id')->implode(',') }}"
                                     data-estatus="{{ $categoria->estatus }}">
+                                    <!-- Columna Nombre -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $categoria->nombre }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
-                                            {{ $categoria->naturaleza->nombre ?? 'Sin naturaleza' }}
-                                        </span>
+
+                                    <!-- Columna Naturalezas -->
+                                    <td class="px-6 py-4">
+                                        @if ($categoria->naturalezas && count($categoria->naturalezas) > 0)
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach ($categoria->naturalezas as $naturaleza)
+                                                    <span
+                                                        class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                                                        {{ $naturaleza->nombre }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-sm text-gray-500">Sin naturalezas</span>
+                                        @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
-                                            {{ $categoria->servicio->nombre ?? 'Sin servicio' }}
-                                        </span>
+
+                                    <!-- Columna Servicios -->
+                                    <td class="px-6 py-4">
+                                        @if ($categoria->servicios && count($categoria->servicios) > 0)
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach ($categoria->servicios as $servicio)
+                                                    <span
+                                                        class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
+                                                        {{ $servicio->nombre }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-sm text-gray-500">Sin servicios</span>
+                                        @endif
                                     </td>
+
+                                    <!-- Columna Estatus -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -120,9 +144,13 @@
                                             {{ $categoria->estatus }}
                                         </span>
                                     </td>
+
+                                    <!-- Columna Tickets -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $categoria->tickets()->count() }}
                                     </td>
+
+                                    <!-- Columna Acciones -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="{{ route('admin.categorias.edit', $categoria->id) }}"
                                             class="text-blue-600 hover:text-blue-900 mr-3">
@@ -181,12 +209,13 @@
                 const estatus = filtroEstatus.value;
 
                 filasCategorias.forEach(fila => {
-                    const filaNaturaleza = fila.getAttribute('data-naturaleza');
-                    const filaServicio = fila.getAttribute('data-servicio');
+                    const filaNaturalezas = fila.getAttribute('data-naturalezas').split(',');
+                    const filaServicios = fila.getAttribute('data-servicios').split(',');
                     const filaEstatus = fila.getAttribute('data-estatus');
 
-                    const coincideNaturaleza = naturalezaId === '' || filaNaturaleza === naturalezaId;
-                    const coincideServicio = servicioId === '' || filaServicio === servicioId;
+                    const coincideNaturaleza = naturalezaId === '' || filaNaturalezas.includes(
+                    naturalezaId);
+                    const coincideServicio = servicioId === '' || filaServicios.includes(servicioId);
                     const coincideEstatus = estatus === '' || filaEstatus === estatus;
 
                     if (coincideNaturaleza && coincideServicio && coincideEstatus) {

@@ -11,7 +11,7 @@
 @stop
 
 @section('content.dashboard')
-    <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-4xl mx-auto">
         <form action="{{ route('admin.categorias.store') }}" method="POST">
             @csrf
 
@@ -19,7 +19,7 @@
                 <label for="nombre" class="block text-gray-700 font-medium mb-2">Nombre de la Categoría:</label>
                 <input type="text" name="nombre" id="nombre"
                     class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('nombre') border-red-500 @enderror"
-                    value="{{ old('nombre') }}" placeholder="Ej: Monitores, Impresoras, Software Office" required>
+                    value="{{ old('nombre') }}" placeholder="Ej: Laptop, Software, Equipo de red" required>
                 @error('nombre')
                     <span class="text-red-500 text-sm mt-1" role="alert">
                         <strong>{{ $message }}</strong>
@@ -27,43 +27,50 @@
                 @enderror
             </div>
 
-            <div class="mb-6">
-                <label for="naturaleza_id" class="block text-gray-700 font-medium mb-2">Naturaleza:</label>
-                <select name="naturaleza_id" id="naturaleza_id"
-                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('naturaleza_id') border-red-500 @enderror"
-                    required>
-                    <option value="">Selecciona una naturaleza</option>
-                    @foreach ($naturalezas as $naturaleza)
-                        <option value="{{ $naturaleza->id }}"
-                            {{ old('naturaleza_id') == $naturaleza->id ? 'selected' : '' }}>
-                            {{ $naturaleza->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('naturaleza_id')
-                    <span class="text-red-500 text-sm mt-1" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Naturalezas:</label>
+                    <div class="border rounded-lg p-3 max-h-60 overflow-y-auto">
+                        @foreach ($naturalezas as $naturaleza)
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" name="naturalezas[]" value="{{ $naturaleza->id }}"
+                                    id="naturaleza_{{ $naturaleza->id }}"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                                    {{ in_array($naturaleza->id, old('naturalezas', [])) ? 'checked' : '' }}>
+                                <label for="naturaleza_{{ $naturaleza->id }}" class="text-sm text-gray-700">
+                                    {{ $naturaleza->nombre }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('naturalezas')
+                        <span class="text-red-500 text-sm mt-1" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
 
-            <div class="mb-6">
-                <label for="servicio_id" class="block text-gray-700 font-medium mb-2">Servicio:</label>
-                <select name="servicio_id" id="servicio_id"
-                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('servicio_id') border-red-500 @enderror"
-                    required>
-                    <option value="">Selecciona un servicio</option>
-                    @foreach ($servicios as $servicio)
-                        <option value="{{ $servicio->id }}" {{ old('servicio_id') == $servicio->id ? 'selected' : '' }}>
-                            {{ $servicio->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('servicio_id')
-                    <span class="text-red-500 text-sm mt-1" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Servicios:</label>
+                    <div class="border rounded-lg p-3 max-h-60 overflow-y-auto">
+                        @foreach ($servicios as $servicio)
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" name="servicios[]" value="{{ $servicio->id }}"
+                                    id="servicio_{{ $servicio->id }}"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                                    {{ in_array($servicio->id, old('servicios', [])) ? 'checked' : '' }}>
+                                <label for="servicio_{{ $servicio->id }}" class="text-sm text-gray-700">
+                                    {{ $servicio->nombre }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('servicios')
+                        <span class="text-red-500 text-sm mt-1" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
             </div>
 
             <div class="mb-6">
