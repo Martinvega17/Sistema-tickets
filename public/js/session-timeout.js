@@ -3,8 +3,8 @@ class SessionTimeout {
     constructor() {
         this.timeout = null;
         this.warningTimeout = null;
-        this.warningTime = 1 * 60; // 2 minutos en segundos (aviso)
-        this.expireTime = 2 * 60; // 3 minutos en segundos (sesión expirada)
+        this.warningTime = 20 * 60; // 9 minutos en segundos (aviso)
+        this.expireTime = 21 * 60; // 10 minutos en segundos (sesión expirada)
         this.warningModal = null;
         this.expiredModal = null;
         this.countdownInterval = null;
