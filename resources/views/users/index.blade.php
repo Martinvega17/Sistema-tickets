@@ -1,11 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title')
     Gestión de Usuarios
 @endsection
 
 
-@section('content')
+@section('content.dashboard')
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-pepsi-blue">Gestión de Usuarios</h1>
         <p class="text-gray-600 mt-2">Selecciona un usuario para editar su información</p>
