@@ -134,7 +134,6 @@
     </div>
 
     <!-- Acciones Rápidas -->
-    <!-- Acciones Rápidas -->
     <div class="bg-white rounded-xl shadow-md p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Gestión de Catálogos</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

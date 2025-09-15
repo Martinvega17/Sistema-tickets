@@ -66,12 +66,16 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('auth');
+
 
     // Usuarios
     Route::controller(UserController::class)->group(function () {
         Route::get('/usuarios', 'index')->name('usuarios.index');
+        Route::get('/usuarios/crear', 'create')->name('usuarios.modals.create'); // Nueva ruta
+        Route::post('/usuarios', 'store')->name('usuarios.store'); // Nueva ruta
         Route::get('/usuarios/editar', 'edit')->name('usuarios.edit');
         Route::put('/usuarios/{user}', 'update')->name('usuarios.update');
         Route::get('/user-json/{user}', 'getUserJson')->name('user.json');
@@ -101,9 +105,6 @@ Route::middleware('auth')->group(function () {
             Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
 
         });
-
-        // Ruta show para todos los usuarios con rol 1,2
-
     });
 
 

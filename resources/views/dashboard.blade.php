@@ -94,7 +94,7 @@
     </div>
 
     <!-- Sección de Gestión (Admin, Supervisor y Coordinador) -->
-    @if (in_array(Auth::user()->rol_id, [1, 2, 3]))
+    @if (in_array(Auth::user()->rol_id, [1, 2, 3, 4]))
         <div class="mt-8">
             <h2 class="text-2xl font-bold text-pepsi-blue mb-6">Gestión del Sistema</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
