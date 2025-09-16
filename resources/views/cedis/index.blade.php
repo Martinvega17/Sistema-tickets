@@ -141,9 +141,9 @@
 
     <!-- Paginación alineada a la derecha -->
     @if ($cedis->hasPages())
-        <div class="bg-white px-4 py-3 flex items-center justify-end border-t border-gray-200 sm:px-6">
-            {{ $cedis->links('vendor.pagination.custom') }}
-        </div>
+    <div class="bg-white px-4 py-3 flex items-center justify-end border-t border-gray-200 sm:px-6">
+        {{ $cedis->links('vendor.pagination.custom') }}
+    </div>
     @endif
     </div>
 
@@ -159,7 +159,7 @@
     <script>
         // Datos de los CEDIS para filtrar
         const cedisData = [
-            @foreach ($cedis as $cedi)
+            @foreach ($allCedis as $cedi)
                 {
                     id: {{ $cedi->id }},
                     nombre: "{{ $cedi->nombre }}",
@@ -271,7 +271,7 @@
             }
         }
     </script>
-@section('scripts')
-    <script src="{{ asset('js/cedis.js') }}"></script>
-@endsection
+    @section('scripts')
+        <script src="{{ asset('js/cedis.js') }}"></script>
+    @endsection
 @endsection

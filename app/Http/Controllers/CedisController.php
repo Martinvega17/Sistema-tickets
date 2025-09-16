@@ -38,11 +38,15 @@ class CedisController extends Controller
     {
         $this->checkAdminSupervisorPermission();
 
-        // Cargar CEDIS con paginación de 10 registros por página
+        // Cargar todos los CEDIS para el filtro JavaScript
+        $allCedis = Cedis::with(['region', 'ingeniero'])->orderBy('nombre')->get();
+
+        // Cargar CEDIS con paginación para la tabla
         $cedis = Cedis::with(['region', 'ingeniero'])->orderBy('nombre')->paginate(10);
+
         $regiones = Region::where('estatus', 'activo')->get();
 
-        return view('cedis.index', compact('cedis', 'regiones'));
+        return view('cedis.index', compact('cedis', 'allCedis', 'regiones'));
     }
 
 

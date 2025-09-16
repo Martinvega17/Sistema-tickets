@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/usuarios/editar', 'edit')->name('usuarios.edit');
         Route::put('/usuarios/{user}', 'update')->name('usuarios.update');
         Route::get('/user-json/{user}', 'getUserJson')->name('user.json');
+        
     });
 
     // Rutas de usuarios con restricción de roles
@@ -99,7 +100,9 @@ Route::middleware('auth')->group(function () {
             Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
             Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
             Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
-            Route::put('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
+            // routes/web.php
+            Route::put('cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])
+                ->name('cedis.toggle-status');
         });
 
         // Ruta show para todos los usuarios con rol 1,2
