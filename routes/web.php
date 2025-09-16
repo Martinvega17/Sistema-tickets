@@ -69,13 +69,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
 
-    // Usuarios
-    Route::controller(UserController::class)->group(function () {
-        Route::get('/usuarios', 'index')->name('usuarios.index');
-        Route::get('/usuarios/editar', 'edit')->name('usuarios.edit');
-        Route::put('/usuarios/{user}', 'update')->name('usuarios.update');
-        Route::get('/user-json/{user}', 'getUserJson')->name('user.json');
-        
+
+
+    // Rutas para gestión de usuarios
+    Route::middleware(['auth', 'role:1,2'])->group(function () {
+        Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create'); // ← NUEVA RUTA
+        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store'); // ← NUEVA RUTA
+        Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
+        Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
     });
 
     // Rutas de usuarios con restricción de roles
@@ -104,9 +106,6 @@ Route::middleware('auth')->group(function () {
             Route::put('cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])
                 ->name('cedis.toggle-status');
         });
-
-        // Ruta show para todos los usuarios con rol 1,2
-
     });
 
 
