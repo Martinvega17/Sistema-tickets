@@ -226,7 +226,8 @@
                             <p class="text-sm font-medium text-gray-800">{{ Auth::user()->nombre }}</p>
                             <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
                         </div>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('profile.index') }}"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <div class="flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -308,6 +309,8 @@
         </div>
     </div>
 </body>
+@yield('scripts')
+
 <script src="{{ asset('js/session-timeout.js') }}"></script>
 <script src="{{ asset('js/user-menu.js') }}"></script>
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AreaController;
 use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Admin\NaturalezaController;
 use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\ProfileController;
 use App\Models\Cedis;
 use App\Models\Region;
 use Illuminate\Support\Facades\Route;
@@ -94,6 +95,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
         Route::get('/cedis/data', [CedisController::class, 'getCedisData'])->name('cedis.data');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Rutas solo para administradores
         Route::middleware(['role:1,2'])->group(function () {
@@ -144,4 +146,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 //Rutas para usarios 
 Route::middleware(['auth', 'role:3,4,5'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+});
+
+// Rutas para perfil de usuario
+Route::prefix('profile')->group(function () {
+    Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/personal', [ProfileController::class, 'personal'])->name('profile.personal');
+    Route::get('/company', [ProfileController::class, 'company'])->name('profile.company');
+    Route::get('/password', [ProfileController::class, 'password'])->name('profile.password');
+
+    Route::post('/personal', [ProfileController::class, 'updatePersonalData'])->name('profile.updatePersonal');
+    Route::post('/company', [ProfileController::class, 'updateCompanyData'])->name('profile.updateCompany');
+    Route::post('/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+    Route::post('/language', [ProfileController::class, 'updateLanguage'])->name('profile.updateLanguage');
 });

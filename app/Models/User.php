@@ -23,6 +23,20 @@ class User extends Authenticatable
         'cedis_id',
         'rol_id',
         'estatus',
+        'genero',
+        'extension',
+        'zona_horaria',
+        'empresa',
+        'pais',
+        'ubicacion',
+        'ciudad',
+        'estado',
+        'departamento',
+        'piso',
+        'torre',
+        'cargo',
+        'centro_costos',
+        'idioma'
     ];
 
     protected $hidden = [
@@ -32,7 +46,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'estatus' => 'integer', // Asegurar que se castee como entero
+        'estatus' => 'integer',
     ];
 
     // Accessor para obtener el estatus como texto

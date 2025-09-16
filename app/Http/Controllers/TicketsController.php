@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ticket;
+use App\Models\Tickets;
 use App\Models\Area;
 use App\Models\Servicio;
 use App\Models\Naturaleza;
@@ -22,7 +22,7 @@ class TicketsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Ticket::with(['usuario', 'ingenieroAsignado', 'cedis', 'area', 'servicio']);
+        $query = Tickets::with(['usuario', 'ingenieroAsignado', 'cedis', 'area', 'servicio']);
 
         // Filtros según el rol del usuario
         if (Auth::user()->rol_id == 4) { // Soporte
@@ -107,7 +107,7 @@ class TicketsController extends Controller
         // Calcular tiempos según prioridad
         $tiempos = $this->calcularTiempos($request->prioridad);
 
-        $ticket = Ticket::create([
+        $ticket = Tickets::create([
             'titulo' => $request->titulo,
             'descripcion' => $request->descripcion,
             'estatus' => 'Abierto',
@@ -143,7 +143,7 @@ class TicketsController extends Controller
             ->with('success', 'Ticket creado exitosamente.');
     }
 
-    public function show(Ticket $ticket)
+    public function show(Tickets $ticket)
     {
         // Verificar permisos para ver el ticket
         $this->authorizeView($ticket);
@@ -178,7 +178,7 @@ class TicketsController extends Controller
         return $tiempos[$prioridad];
     }
 
-    private function authorizeView(Ticket $ticket)
+    private function authorizeView(Tickets $ticket)
     {
         $user = Auth::user();
 
@@ -207,14 +207,6 @@ class TicketsController extends Controller
         return response()->json($servicios);
     }
 
-    public function getTiposByNaturaleza($naturalezaId)
-    {
-        $tipos = TipoNaturaleza::where('naturaleza_id', $naturalezaId)
-            ->where('estatus', 'activo')
-            ->get();
-
-        return response()->json($tipos);
-    }
 
     private function notificarUsuarios($ticket, $usuariosIds)
     {
