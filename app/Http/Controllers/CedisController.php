@@ -58,25 +58,16 @@ class CedisController extends Controller
             $query->where('estatus', $request->estatus);
         }
 
-        $cedis = $query->orderBy('nombre')->paginate(15);
+        // Cambiar get() por paginate() y mantener los parámetros de búsqueda en la paginación
+        $cedis = $query->orderBy('nombre')->paginate(10)->appends($request->query());
         $regiones = Region::where('estatus', 'activo')->get();
 
-        // Para peticiones AJAX
+        // Si es una petición AJAX, devolver JSON
         if ($request->ajax()) {
-            return response()->json([
-                'cedis' => $cedis->items(),
-                'pagination' => [
-                    'current_page' => $cedis->currentPage(),
-                    'last_page' => $cedis->lastPage(),
-                    'per_page' => $cedis->perPage(),
-                    'total' => $cedis->total(),
-                ],
-                'regiones' => $regiones,
-                'ingenieros' => $this->getIngenieros()
-            ]);
+            return response()->json($cedis);
         }
 
-        return view('cedis.index', compact('regiones'));
+        return view('cedis.index', compact('cedis', 'regiones'));
     }
 
     public function create()
@@ -122,7 +113,7 @@ class CedisController extends Controller
     public function getCedisData(Request $request)
     {
         try {
-            $query = Cedis::with(['region', 'ingeniero']);
+            $query = Cedis::with(['region', 'ingeniero']); // ← Asegúrate de incluir 'region'
 
             // Filtros
             if ($request->query('search')) {
@@ -200,16 +191,7 @@ class CedisController extends Controller
 
         try {
             $cedis = Cedis::findOrFail($id);
-
-            $cedis->update([
-                'nombre' => $request->nombre,
-                'direccion' => $request->direccion,
-                'telefono' => $request->telefono,
-                'responsable' => $request->responsable,
-                'region_id' => $request->region_id,
-                'estatus' => $request->estatus,
-                'ingeniero_id' => $request->ingeniero_id
-            ]);
+            $cedis->update($request->all());
 
             return response()->json([
                 'message' => 'CEDIS actualizado correctamente',
@@ -223,32 +205,64 @@ class CedisController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, Cedis $cedis)
+    public function toggleStatus(Request $request, Cedis $cedis)
     {
-        $this->checkAdminPermission();
+        Log::info('toggleStatus llamado', [
+            'cedis_id' => $cedis->id,
+            'user_id' => Auth::id(),
+            'nuevo_estatus' => $request->estatus
+        ]);
+
+        // Permitir rol 1 y 2
+        if (!in_array(Auth::user()->rol_id, [1, 2])) {
+            Log::warning('Usuario sin permisos intentó cambiar estatus', [
+                'user_id' => Auth::id(),
+                'rol_id' => Auth::user()->rol_id
+            ]);
+            return response()->json(['error' => 'No tienes permisos'], 403);
+        }
 
         $validator = Validator::make($request->all(), [
             'estatus' => 'required|in:activo,inactivo'
         ]);
 
         if ($validator->fails()) {
+            Log::error('Validación fallida en toggleStatus', [
+                'errors' => $validator->errors()
+            ]);
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
         try {
+            Log::info('Cambiando estatus del CEDIS', [
+                'cedis_id' => $cedis->id,
+                'estatus_anterior' => $cedis->estatus,
+                'estatus_nuevo' => $request->estatus
+            ]);
+
             $cedis->estatus = $request->estatus;
             $cedis->save();
+
+            Log::info('Estatus actualizado correctamente', [
+                'cedis_id' => $cedis->id,
+                'estatus_actual' => $cedis->estatus
+            ]);
 
             return response()->json([
                 'message' => 'Estatus actualizado correctamente',
                 'estatus' => $cedis->estatus
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error al actualizar el estatus: ' . $e->getMessage()
-            ], 500);
+            Log::error('Error al actualizar estatus:', [
+                'error' => $e->getMessage(),
+                'cedis_id' => $cedis->id
+            ]);
+            return response()->json(['error' => 'Error interno del servidor'], 500);
         }
     }
+
+
+
 
     public function destroy($id)
     {

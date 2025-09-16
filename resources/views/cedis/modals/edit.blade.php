@@ -155,15 +155,15 @@
 
         async function handleEditCedis(e) {
             try {
+                e.preventDefault(); // ← AÑADIR ESTO
                 const formData = new FormData(e.target);
                 const data = Object.fromEntries(formData.entries());
                 const cedisId = data.id;
 
                 const response = await fetch(`/cedis/${cedisId}`, {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: {
                         'X-CSRF-TOKEN': getCsrfToken(),
-                        'X-HTTP-Method-Override': 'PUT',
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -180,7 +180,6 @@
 
                 // Redirigir al índice
                 window.location.href = "{{ route('cedis.index') }}";
-
             } catch (error) {
                 console.error('Error al actualizar CEDIS:', error);
                 alert('Error al actualizar el CEDIS: ' + error.message);

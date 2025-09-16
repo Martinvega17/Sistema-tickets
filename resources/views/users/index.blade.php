@@ -17,6 +17,17 @@
             <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
                 <h2 class="text-xl font-semibold text-pepsi-blue mb-4">Seleccionar Usuario</h2>
 
+                @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
+                    <a href="{{ route('usuarios.modals.create') }}"
+                        class="px-6 py-3 bg-pepsi-blue text-white rounded-lg hover:bg-pepsi-dark-blue transition-colors font-medium flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Crear Usuario
+                    </a>
+                @endif
+
                 <!-- Búsqueda -->
                 <div class="mb-4">
                     <input type="text" id="userSearch" placeholder="Buscar usuario..."

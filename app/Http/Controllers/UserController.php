@@ -51,6 +51,66 @@ class UserController extends Controller
         return view('users.index', compact('users', 'roles', 'regiones', 'cedis'));
     }
 
+    // Agregar estos métodos al UserController
+
+    public function create()
+    {
+        // Verificar permisos (solo admin y supervisor)
+        if (Auth::user()->rol_id != 1 && Auth::user()->rol_id != 2) {
+            abort(403, 'No tienes permisos para acceder a esta sección');
+        }
+
+        $roles = Rol::all();
+        $regiones = Region::where('estatus', 'activo')->get();
+        $cedis = Cedis::where('estatus', 'activo')->get();
+
+        return view('users.modals.create', compact('roles', 'regiones', 'cedis'));
+    }
+
+    public function store(Request $request)
+    {
+        // CORREGIDO: Solo administradores pueden crear usuarios
+        if (Auth::user()->rol_id != 1) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:100',
+            'apellido' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'numero_nomina' => 'required|string|max:50|unique:users,numero_nomina',
+            'telefono' => 'nullable|string|max:20',
+            'rol_id' => 'required|exists:roles,id',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Crear nuevo usuario
+        $user = User::create([
+            'numero_nomina' => $request->numero_nomina,
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'telefono' => $request->telefono,
+            'rol_id' => $request->rol_id,
+            'region_id' => $request->region_id,
+            'cedis_id' => $request->cedis_id,
+            'estatus' => 1, // Activo por defecto
+        ]);
+
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'user_id' => $user->id
+        ]);
+    }
+
     public function updateStatus(Request $request, User $user)
     {
         if (Auth::user()->rol_id != 1) {
