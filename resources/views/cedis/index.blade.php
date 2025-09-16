@@ -18,15 +18,15 @@
 
         <!-- Filtros de búsqueda -->
         <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <form id="searchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Buscar por nombre</label>
-                    <input type="text" id="searchInput" placeholder="Nombre del CEDIS"
+                    <input type="text" id="searchInput" placeholder="Nombre del CEDIS o Ingeniero"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Región</label>
-                    <select id="regionFilter"
+                    <select id="regionSelect"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
                         <option value="">Todas las regiones</option>
                         @foreach ($regiones as $region)
@@ -36,7 +36,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Estatus</label>
-                    <select id="statusFilter"
+                    <select id="estatusSelect"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
                         <option value="">Todos</option>
                         <option value="activo">Activo</option>
@@ -44,10 +44,17 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="button" onclick="filterCedis()"
-                        class="w-full px-4 py-2 bg-pepsi-blue text-white rounded-lg hover:bg-pepsi-dark-blue transition duration-150 ease-in-out">Buscar</button>
+                    <button type="button" onclick="limpiarFiltros()"
+                        class="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out">
+                        Limpiar Filtros
+                    </button>
                 </div>
-            </form>
+            </div>
+        </div>
+
+        <!-- Información de resultados -->
+        <div class="mb-4 text-sm text-gray-600">
+            Mostrando <span id="contadorActual">{{ $cedis->count() }}</span> de {{ $cedis->count() }} CEDIS
         </div>
 
         <!-- Tabla de CEDIS -->
@@ -68,7 +75,7 @@
                                 Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="cedisTableBody" class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200" id="tablaCedis">
                         @foreach ($cedis as $cedi)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $cedi->nombre }}</td>
@@ -90,12 +97,19 @@
                                         class="text-blue-600 hover:text-blue-900 mr-3">
                                         <i class="bi bi-pencil-square"></i> Editar
                                     </a>
-                                    <button onclick="toggleStatus({{ $cedi->id }}, '{{ $cedi->estatus }}')"
-                                        class="{{ $cedi->estatus === 'activo' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' }} mr-3">
-                                        <i
-                                            class="bi {{ $cedi->estatus === 'activo' ? 'bi-x-circle' : 'bi-check-circle' }}"></i>
-                                        {{ $cedi->estatus === 'activo' ? 'Desactivar' : 'Activar' }}
-                                    </button>
+
+                                    <form action="{{ route('cedis.toggle-status', $cedi->id) }}" method="POST"
+                                        class="inline-block">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit"
+                                            class="{{ $cedi->estatus === 'activo' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' }} mr-3">
+                                            <i
+                                                class="bi {{ $cedi->estatus === 'activo' ? 'bi-x-circle' : 'bi-check-circle' }}"></i>
+                                            {{ $cedi->estatus === 'activo' ? 'Desactivar' : 'Activar' }}
+                                        </button>
+                                    </form>
+
                                     <button
                                         onclick="openDeleteModal({{ $cedi->id }}, '{{ addslashes($cedi->nombre) }}')"
                                         class="text-red-600 hover:text-red-900">
@@ -108,125 +122,128 @@
                 </table>
             </div>
         </div>
+
+        @if ($cedis->isEmpty())
+            <div class="text-center py-8">
+                <p class="text-gray-500">No hay CEDIS registrados.</p>
+            </div>
+        @endif
     </div>
 
     @include('cedis.modals.destroy')
 
-    <!-- JavaScript simple para filtros -->
     <script>
-        // Pasar datos de CEDIS a JavaScript
-        const allCedis = @json($cedis);
+        // Datos de los CEDIS para filtrar
+        const cedisData = [
+            @foreach ($cedis as $cedi)
+                {
+                    id: {{ $cedi->id }},
+                    nombre: "{{ $cedi->nombre }}",
+                    region_id: "{{ $cedi->region_id }}",
+                    region_nombre: "{{ $cedi->region ? $cedi->region->nombre : '' }}",
+                    estatus: "{{ $cedi->estatus }}",
+                    ingeniero: "{{ $cedi->ingeniero ? $cedi->ingeniero->nombre . ' ' . $cedi->ingeniero->apellido : '' }}",
+                    html: `{!! '<tr>' .
+                        '<td class="px-6 py-4 whitespace-nowrap">' .
+                        $cedi->nombre .
+                        '</td>' .
+                        '<td class="px-6 py-4 whitespace-nowrap"><span class="text-gray-400">' .
+                        ($cedi->ingeniero ? $cedi->ingeniero->nombre . ' ' . $cedi->ingeniero->apellido : 'Sin asignar') .
+                        '</span></td>' .
+                        '<td class="px-6 py-4 whitespace-nowrap">' .
+                        ($cedi->region ? $cedi->region->nombre : 'N/A') .
+                        '</td>' .
+                        '<td class="px-6 py-4 whitespace-nowrap">' .
+                        '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' .
+                        ($cedi->estatus === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') .
+                        '">' .
+                        ($cedi->estatus === 'activo' ? 'Activo' : 'Inactivo') .
+                        '</span>' .
+                        '</td>' .
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">' .
+                        '<a href="/cedis/' .
+                        $cedi->id .
+                        '/edit" class="text-blue-600 hover:text-blue-900 mr-3">' .
+                        '<i class="bi bi-pencil-square"></i> Editar' .
+                        '</a>' .
+                        '<form action="/cedis/' .
+                        $cedi->id .
+                        '/toggle-status" method="POST" class="inline-block">' .
+                        '@csrf @method("PUT")' .
+                        '<button type="submit" class="' .
+                        ($cedi->estatus === 'activo' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900') .
+                        ' mr-3">' .
+                        '<i class="bi ' .
+                        ($cedi->estatus === 'activo' ? 'bi-x-circle' : 'bi-check-circle') .
+                        '"></i>' .
+                        ($cedi->estatus === 'activo' ? 'Desactivar' : 'Activar') .
+                        '</button>' .
+                        '</form>' .
+                        '<button onclick="openDeleteModal(' .
+                        $cedi->id .
+                        ', \'' .
+                        addslashes($cedi->nombre) .
+                        '\')" class="text-red-600 hover:text-red-900">' .
+                        '<i class="bi bi-trash"></i> Eliminar' .
+                        '</button>' .
+                        '</td>' .
+                        '</tr>' !!}`
+                },
+            @endforeach
+        ];
 
-        function filterCedis() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const regionId = document.getElementById('regionFilter').value;
-            const status = document.getElementById('statusFilter').value;
+        function aplicarFiltros() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const regionValue = document.getElementById('regionSelect').value;
+            const estatusValue = document.getElementById('estatusSelect').value;
 
-            const filteredCedis = allCedis.filter(cedis => {
-                const matchesSearch = cedis.nombre.toLowerCase().includes(searchTerm) ||
-                    (cedis.codigo && cedis.codigo.toLowerCase().includes(searchTerm));
-                const matchesRegion = !regionId || cedis.region_id == regionId;
-                const matchesStatus = !status || cedis.estatus === status;
+            const resultadosFiltrados = cedisData.filter(cedi => {
+                const coincideBusqueda = searchValue === '' ||
+                    cedi.nombre.toLowerCase().includes(searchValue) ||
+                    cedi.ingeniero.toLowerCase().includes(searchValue);
+                const coincideRegion = regionValue === '' || cedi.region_id == regionValue;
+                const coincideEstatus = estatusValue === '' || cedi.estatus === estatusValue;
 
-                return matchesSearch && matchesRegion && matchesStatus;
+                return coincideBusqueda && coincideRegion && coincideEstatus;
             });
 
-            renderCedisTable(filteredCedis);
+            // Actualizar tabla
+            const tablaBody = document.getElementById('tablaCedis');
+            tablaBody.innerHTML = resultadosFiltrados.map(cedi => cedi.html).join('');
+
+            // Actualizar contador
+            document.getElementById('contadorActual').textContent = resultadosFiltrados.length;
         }
 
-        function renderCedisTable(cedisList) {
-            const tbody = document.getElementById('cedisTableBody');
-            tbody.innerHTML = cedisList.map(cedis => `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">${cedis.nombre}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="text-gray-400">
-                            ${cedis.ingeniero ? cedis.ingeniero.nombre + ' ' + cedis.ingeniero.apellido : 'Sin asignar'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">${cedis.region ? cedis.region.nombre : 'N/A'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${cedis.estatus === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${cedis.estatus === 'activo' ? 'Activo' : 'Inactivo'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="/cedis/${cedis.id}/edit" class="text-blue-600 hover:text-blue-900 mr-3">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </a>
-                        <button onclick="toggleStatus(${cedis.id}, '${cedis.estatus}')" 
-                                class="${cedis.estatus === 'activo' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'} mr-3">
-                            <i class="bi ${cedis.estatus === 'activo' ? 'bi-x-circle' : 'bi-check-circle'}"></i> 
-                            ${cedis.estatus === 'activo' ? 'Desactivar' : 'Activar'}
-                        </button>
-                        <button onclick="openDeleteModal(${cedis.id}, '${cedis.nombre.replace(/'/g, "\\'")}')" 
-                                class="text-red-600 hover:text-red-900">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+        function limpiarFiltros() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('regionSelect').value = '';
+            document.getElementById('estatusSelect').value = '';
+            aplicarFiltros();
         }
 
-        // Funciones para modales (mantener las que ya tienes)
+        // Configurar event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchInput').addEventListener('input', aplicarFiltros);
+            document.getElementById('regionSelect').addEventListener('change', aplicarFiltros);
+            document.getElementById('estatusSelect').addEventListener('change', aplicarFiltros);
+        });
+
+        // Funciones para modales (si las necesitas)
         function openDeleteModal(cedisId, cedisName) {
-            document.getElementById('deleteCedisName').textContent = cedisName;
-            document.getElementById('deleteCedisModal').setAttribute('data-cedis-id', cedisId);
-            document.getElementById('deleteCedisModal').classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        async function confirmDeleteCedis() {
-            const modal = document.getElementById('deleteCedisModal');
-            const cedisId = modal.getAttribute('data-cedis-id');
-
-            try {
-                const response = await fetch(`/cedis/${cedisId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    alert('CEDIS eliminado correctamente');
-                    window.location.reload();
-                } else {
-                    throw new Error('Error al eliminar');
-                }
-            } catch (error) {
-                alert('Error al eliminar el CEDIS');
+            if (document.getElementById('deleteCedisName')) {
+                document.getElementById('deleteCedisName').textContent = cedisName;
+            }
+            if (document.getElementById('deleteCedisModal')) {
+                const modal = document.getElementById('deleteCedisModal');
+                modal.setAttribute('data-cedis-id', cedisId);
+                modal.classList.remove('hidden');
             }
         }
 
-        async function toggleStatus(cedisId, currentStatus) {
-            if (confirm(`¿Estás seguro de ${currentStatus === 'activo' ? 'desactivar' : 'activar'} este CEDIS?`)) {
-                try {
-                    const newStatus = currentStatus === 'activo' ? 'inactivo' : 'activo';
-                    const response = await fetch(`/cedis/${cedisId}/estatus`, {
-                        method: 'PUT',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            estatus: newStatus
-                        })
-                    });
-
-                    if (response.ok) {
-                        alert('Estatus actualizado correctamente');
-                        window.location.reload();
-                    } else {
-                        throw new Error('Error al cambiar estatus');
-                    }
-                } catch (error) {
-                    alert('Error al cambiar el estatus del CEDIS');
-                }
+        function closeModal(modalId) {
+            if (document.getElementById(modalId)) {
+                document.getElementById(modalId).classList.add('hidden');
             }
         }
     </script>

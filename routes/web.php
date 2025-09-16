@@ -66,16 +66,12 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
-        ->name('dashboard')
-        ->middleware('auth');
-
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
 
     // Usuarios
     Route::controller(UserController::class)->group(function () {
         Route::get('/usuarios', 'index')->name('usuarios.index');
-        Route::get('/usuarios/crear', 'create')->name('usuarios.modals.create'); // Nueva ruta
-        Route::post('/usuarios', 'store')->name('usuarios.store'); // Nueva ruta
         Route::get('/usuarios/editar', 'edit')->name('usuarios.edit');
         Route::put('/usuarios/{user}', 'update')->name('usuarios.update');
         Route::get('/user-json/{user}', 'getUserJson')->name('user.json');
@@ -96,15 +92,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/cedis/data', [CedisController::class, 'getCedisData'])->name('cedis.data');
 
         // Rutas solo para administradores
-        Route::middleware(['role:1'])->group(function () {
+        Route::middleware(['role:1,2'])->group(function () {
             Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
             Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
             Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
             Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
             Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
             Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
-
+            Route::put('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
         });
+
+        // Ruta show para todos los usuarios con rol 1,2
+
     });
 
 
