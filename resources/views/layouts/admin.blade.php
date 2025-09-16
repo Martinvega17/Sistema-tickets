@@ -201,8 +201,7 @@
 
             <!-- Menú de usuario en la parte superior derecha -->
             <div class="flex items-center space-x-4">
-                <span class="text-sm text-gray-600">{{ now()->format('d/m/Y h:i A') }}
-                </span>
+
 
                 <div class="relative">
                     <button class="flex items-center space-x-3 focus:outline-none" onclick="toggleUserMenu()">
