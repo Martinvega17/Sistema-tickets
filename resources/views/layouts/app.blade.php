@@ -56,10 +56,13 @@
     <div class="flex flex-col w-64 pepsi-gradient text-white">
         <div class="flex items-center justify-center h-20 border-b border-blue-700 p-4">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-pepsi-red rounded-full flex items-center justify-center">
-                    <span class="text-white font-bold text-lg">P</span>
+                <!-- Logo personalizable -->
+                <div class="w-18 h-18 rounded-full flex items-center justify-center overflow-hidden">
+                    <!-- Reemplaza la ruta con la de tu logo -->
+                    <img src="{{ asset('img/logo.png') }}" alt="Logo Pepsi" class="w-full h-full object-contain p-1">
+                    <!-- Fallback si la imagen no carga -->
+                    <span class="text-pepsi-blue font-bold text-lg hidden">P</span>
                 </div>
-                <h1 class="text-xl font-bold">Pepsi Tickets</h1>
             </div>
         </div>
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CedisController;
@@ -138,4 +139,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('servicios', ServicioController::class);
     Route::resource('naturaleza', NaturalezaController::class);
     Route::resource('categorias', CategoriaController::class);
+});
+
+//Rutas para usarios 
+Route::middleware(['auth', 'role:3,4,5'])->group(function () {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 });

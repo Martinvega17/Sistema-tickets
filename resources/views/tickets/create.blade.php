@@ -99,16 +99,6 @@
                             </select>
                         </div>
 
-                        <div>
-                            <label for="tipo_naturaleza_id" class="block text-sm font-medium text-gray-700 mb-1">Tipo de
-                                Naturaleza *</label>
-                            <select name="tipo_naturaleza_id" id="tipo_naturaleza_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione el tipo</option>
-                                <!-- Los tipos se cargarán dinámicamente via AJAX -->
-                            </select>
-                        </div>
-
                         <!-- Categoría y Grupo de Trabajo -->
                         <div>
                             <label for="categoria_id" class="block text-sm font-medium text-gray-700 mb-1">Categoría
@@ -125,7 +115,7 @@
                         <div>
                             <label for="grupo_trabajo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo de
                                 Trabajo *</label>
-                            <select name="grupo_trabajo_id" id="grupo_trabajo_id" required
+                            <select name="grupo_trabajo_id" id="grupo_trabajo_id"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
                                 <option value="">Seleccione un grupo</option>
                                 @foreach ($gruposTrabajo as $grupo)
@@ -138,7 +128,7 @@
                         <div>
                             <label for="actividad_id" class="block text-sm font-medium text-gray-700 mb-1">Actividad
                                 *</label>
-                            <select name="actividad_id" id="actividad_id" required
+                            <select name="actividad_id" id="actividad_id"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
                                 <option value="">Seleccione una actividad</option>
                                 @foreach ($actividades as $actividad)
