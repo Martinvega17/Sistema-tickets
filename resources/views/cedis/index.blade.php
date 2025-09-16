@@ -3,6 +3,12 @@
 @section('content.dashboard')
     <div class="container mx-auto px-4 py-8">
         <!-- Encabezado -->
+
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                {{ session('success') }}
+            </div>
+        @endif
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Gestión de CEDIS</h1>
@@ -102,8 +108,11 @@
                                         class="inline-block">
                                         @csrf
                                         @method('PUT')
+                                        <input type="hidden" name="estatus"
+                                            value="{{ $cedi->estatus === 'activo' ? 'inactivo' : 'activo' }}">
                                         <button type="submit"
-                                            class="{{ $cedi->estatus === 'activo' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' }} mr-3">
+                                            class="{{ $cedi->estatus === 'activo' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' }} mr-3"
+                                            onclick="return confirm('¿Estás seguro que quieres {{ $cedi->estatus === 'activo' ? 'desactivar' : 'activar' }} el CEDIS \'{{ $cedi->nombre }}\'?')">
                                             <i
                                                 class="bi {{ $cedi->estatus === 'activo' ? 'bi-x-circle' : 'bi-check-circle' }}"></i>
                                             {{ $cedi->estatus === 'activo' ? 'Desactivar' : 'Activar' }}
@@ -247,4 +256,7 @@
             }
         }
     </script>
+@section('scripts')
+    <script src="{{ asset('js/cedis.js') }}"></script>
+@endsection
 @endsection

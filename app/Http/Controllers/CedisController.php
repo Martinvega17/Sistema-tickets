@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Schema;
 
 class CedisController extends Controller
 {
@@ -37,38 +38,13 @@ class CedisController extends Controller
     {
         $this->checkAdminSupervisorPermission();
 
-        $query = Cedis::with(['region', 'ingeniero']);
-
-        // Búsqueda
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nombre', 'like', "%$search%")
-                    ->orWhere('codigo', 'like', "%$search%")
-                    ->orWhere('responsable', 'like', "%$search%");
-            });
-        }
-
-        // Filtros
-        if ($request->has('region') && !empty($request->region)) {
-            $query->where('region_id', $request->region);
-        }
-
-        if ($request->has('estatus') && $request->estatus !== '') {
-            $query->where('estatus', $request->estatus);
-        }
-
-        // Cambiar get() por paginate() y mantener los parámetros de búsqueda en la paginación
-        $cedis = $query->orderBy('nombre')->paginate(10)->appends($request->query());
+        // Cargar todos los CEDIS para el filtro en el cliente
+        $cedis = Cedis::with(['region', 'ingeniero'])->orderBy('nombre')->get();
         $regiones = Region::where('estatus', 'activo')->get();
-
-        // Si es una petición AJAX, devolver JSON
-        if ($request->ajax()) {
-            return response()->json($cedis);
-        }
 
         return view('cedis.index', compact('cedis', 'regiones'));
     }
+
 
     public function create()
     {
@@ -205,39 +181,28 @@ class CedisController extends Controller
         }
     }
 
-    public function toggleStatus(Request $request, Cedis $cedis)
+    // En CedisController.php, actualiza el método toggleStatus:
+
+    public function toggleStatus(Request $request, $id)
     {
-        Log::info('toggleStatus llamado', [
-            'cedis_id' => $cedis->id,
-            'user_id' => Auth::id(),
-            'nuevo_estatus' => $request->estatus
-        ]);
-
-        // Permitir rol 1 y 2
-        if (!in_array(Auth::user()->rol_id, [1, 2])) {
-            Log::warning('Usuario sin permisos intentó cambiar estatus', [
-                'user_id' => Auth::id(),
-                'rol_id' => Auth::user()->rol_id
-            ]);
-            return response()->json(['error' => 'No tienes permisos'], 403);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'estatus' => 'required|in:activo,inactivo'
-        ]);
-
-        if ($validator->fails()) {
-            Log::error('Validación fallida en toggleStatus', [
-                'errors' => $validator->errors()
-            ]);
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        $this->checkAdminSupervisorPermission();
 
         try {
+            $cedis = Cedis::findOrFail($id);
+
+            $validator = Validator::make($request->all(), [
+                'estatus' => 'required|in:activo,inactivo'
+            ]);
+
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
+            }
+
             Log::info('Cambiando estatus del CEDIS', [
                 'cedis_id' => $cedis->id,
                 'estatus_anterior' => $cedis->estatus,
-                'estatus_nuevo' => $request->estatus
+                'estatus_nuevo' => $request->estatus,
+                'user_id' => Auth::id()
             ]);
 
             $cedis->estatus = $request->estatus;
@@ -248,16 +213,16 @@ class CedisController extends Controller
                 'estatus_actual' => $cedis->estatus
             ]);
 
-            return response()->json([
-                'message' => 'Estatus actualizado correctamente',
-                'estatus' => $cedis->estatus
-            ]);
+            // Redirigir de vuelta con mensaje de éxito
+            return redirect()->back()->with('success', 'Estatus actualizado correctamente');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'CEDIS no encontrado');
         } catch (\Exception $e) {
             Log::error('Error al actualizar estatus:', [
                 'error' => $e->getMessage(),
-                'cedis_id' => $cedis->id
+                'cedis_id' => $id
             ]);
-            return response()->json(['error' => 'Error interno del servidor'], 500);
+            return redirect()->back()->with('error', 'Error interno del servidor');
         }
     }
 

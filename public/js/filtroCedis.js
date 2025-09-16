@@ -31,7 +31,14 @@ function limpiarFiltros() {
     aplicarFiltros();
 }
 
-// Modales
+// Configurar event listeners
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('searchInput').addEventListener('input', aplicarFiltros);
+    document.getElementById('regionSelect').addEventListener('change', aplicarFiltros);
+    document.getElementById('estatusSelect').addEventListener('change', aplicarFiltros);
+});
+
+// Funciones para modales (si las necesitas)
 function openDeleteModal(cedisId, cedisName) {
     if (document.getElementById('deleteCedisName')) {
         document.getElementById('deleteCedisName').textContent = cedisName;
@@ -48,10 +55,3 @@ function closeModal(modalId) {
         document.getElementById(modalId).classList.add('hidden');
     }
 }
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('searchInput').addEventListener('input', aplicarFiltros);
-    document.getElementById('regionSelect').addEventListener('change', aplicarFiltros);
-    document.getElementById('estatusSelect').addEventListener('change', aplicarFiltros);
-});
