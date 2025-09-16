@@ -139,6 +139,21 @@
         @endif
     </div>
 
+    <!-- Paginación alineada a la derecha -->
+    @if ($cedis->hasPages())
+        <div class="bg-white px-4 py-3 flex items-center justify-end border-t border-gray-200 sm:px-6">
+            {{ $cedis->links('vendor.pagination.custom') }}
+        </div>
+    @endif
+    </div>
+
+    @if ($cedis->isEmpty())
+        <div class="text-center py-8">
+            <p class="text-gray-500">No hay CEDIS registrados.</p>
+        </div>
+    @endif
+    </div>
+
     @include('cedis.modals.destroy')
 
     <script>
