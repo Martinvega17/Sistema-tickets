@@ -33,9 +33,9 @@ return new class extends Migration
 
             // Relaciones con otras tablas
             $table->foreignId('area_id')->nullable()->constrained('areas');
+            $table->foreignId('region_id')->nullable()->constrained('regiones');
             $table->foreignId('servicio_id')->nullable()->constrained('servicios');
             $table->foreignId('naturaleza_id')->nullable()->constrained('naturalezas');
-            $table->foreignId('tipo_naturaleza_id')->nullable()->constrained('tipo_naturalezas');
             $table->foreignId('categoria_id')->nullable()->constrained('categorias');
             $table->foreignId('grupo_trabajo_id')->nullable()->constrained('grupo_trabajos');
             $table->foreignId('actividad_id')->nullable()->constrained('actividades');

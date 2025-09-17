@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
+
 class Region extends Model
 {
     use HasFactory;
@@ -21,5 +23,10 @@ class Region extends Model
     public function cedis()
     {
         return $this->hasMany(Cedis::class, 'region_id');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Tickets::class);
     }
 }

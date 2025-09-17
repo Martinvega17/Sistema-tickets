@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Admin\NaturalezaController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\RegionController;
 use App\Models\Cedis;
 use App\Models\Region;
 use Illuminate\Support\Facades\Route;
@@ -53,11 +54,6 @@ Route::get('/cedis-por-region/{regionId}', function ($regionId) {
     return response()->json($cedis);
 });
 
-Route::get('/api/regiones', function () {
-    return response()->json(
-        Region::where('estatus', 'activo')->get(['id', 'nombre'])
-    );
-});
 
 // Ruta para Self Service (accesible sin autenticación)
 Route::get('/self-service', [SelfServiceController::class, 'index'])->name('self-service');
@@ -141,6 +137,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('servicios', ServicioController::class);
     Route::resource('naturaleza', NaturalezaController::class);
     Route::resource('categorias', CategoriaController::class);
+    Route::resource('regiones', RegionController::class)->parameters([
+        'regiones' => 'region' // Esto soluciona el problema
+    ]);
 });
 
 //Rutas para usarios 
