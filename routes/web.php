@@ -87,26 +87,6 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // Rutas para gestión de CEDIS
-    Route::middleware(['auth', 'role:1,2'])->group(function () {
-        Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
-        Route::get('/cedis/data', [CedisController::class, 'getCedisData'])->name('cedis.data');
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-        // Rutas solo para administradores
-        Route::middleware(['role:1,2'])->group(function () {
-            Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
-            Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
-            Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
-            Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
-            Route::put('/cedis/{cedis}/estatus', [CedisController::class, 'updateStatus'])->name('cedis.estatus');
-            Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy'); // ← NUEVA RUTA
-            // routes/web.php
-            Route::put('cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])
-                ->name('cedis.toggle-status');
-        });
-    });
-
 
     // Base de Conocimiento - Todas las rutas en un resource
     Route::prefix('knowledgebase')->controller(KnowledgeBaseController::class)->group(function () {
@@ -137,9 +117,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('servicios', ServicioController::class);
     Route::resource('naturaleza', NaturalezaController::class);
     Route::resource('categorias', CategoriaController::class);
-    Route::resource('regiones', RegionController::class)->parameters([
-        'regiones' => 'region' // Esto soluciona el problema
-    ]);
+    Route::resource('regiones', RegionController::class);
+
+    // Rutas para CEDIS
+    Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
+    Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
+    Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
+    Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
+    Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
+    Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
+    Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
 });
 
 //Rutas para usarios 

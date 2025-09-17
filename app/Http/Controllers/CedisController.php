@@ -46,7 +46,7 @@ class CedisController extends Controller
 
         $regiones = Region::where('estatus', 'activo')->get();
 
-        return view('cedis.index', compact('cedis', 'allCedis', 'regiones'));
+        return view('admin.cedis.index', compact('cedis', 'allCedis', 'regiones'));
     }
 
 
@@ -54,7 +54,7 @@ class CedisController extends Controller
     {
         $this->checkAdminPermission();
 
-        return view('cedis.modals.create', [
+        return view('admin.cedis.create', [
             'regiones' => Region::where('estatus', 'activo')->get(),
             'ingenieros' => $this->getIngenieros()
         ]);
@@ -66,7 +66,7 @@ class CedisController extends Controller
 
         $cedis = Cedis::findOrFail($id);
 
-        return view('cedis.modals.edit', [
+        return view('admin.cedis.edit', [
             'cedis' => $cedis,
             'regiones' => Region::where('estatus', 'activo')->get(),
             'ingenieros' => $this->getIngenieros(),
@@ -143,7 +143,7 @@ class CedisController extends Controller
 
         try {
             Cedis::create($request->all());
-            return redirect()->route('cedis.index')
+            return redirect()->route('admin.cedis.index')
                 ->with('success', 'CEDIS creado correctamente');
         } catch (\Exception $e) {
             Log::error('Error al crear CEDIS: ' . $e->getMessage());
@@ -166,24 +166,23 @@ class CedisController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return back()->withErrors($validator)->withInput();
         }
 
         try {
             $cedis = Cedis::findOrFail($id);
             $cedis->update($request->all());
 
-            return response()->json([
-                'message' => 'CEDIS actualizado correctamente',
-                'cedis' => $cedis
-            ]);
+            return redirect()->route('admin.cedis.index')
+                ->with('success', 'CEDIS actualizado correctamente');
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'CEDIS no encontrado'], 404);
+            return redirect()->back()->with('error', 'CEDIS no encontrado');
         } catch (\Exception $e) {
             Log::error('Error en update:', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Error interno del servidor'], 500);
+            return redirect()->back()->with('error', 'Error interno del servidor');
         }
     }
+
 
     // En CedisController.php, actualiza el método toggleStatus:
 
@@ -231,8 +230,6 @@ class CedisController extends Controller
     }
 
 
-
-
     public function destroy($id)
     {
         $this->checkAdminPermission();
@@ -249,9 +246,8 @@ class CedisController extends Controller
 
             $cedis->delete();
 
-            return response()->json([
-                'message' => 'CEDIS eliminado correctamente'
-            ]);
+            return redirect()->route('admin.cedis.index')
+                ->with('success', 'CEDIS eliminado correctamente');
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'CEDIS no encontrado'], 404);
         } catch (\Exception $e) {
