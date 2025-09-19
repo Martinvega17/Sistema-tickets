@@ -6,26 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Cedis;
 use App\Models\Region;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CedisController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $search = $request->input('search');
-        $regionId = $request->input('region_id');
+        // Obtener todos los CEDIS con sus regiones
+        $cedis = Cedis::with('region')->orderBy('nombre')->paginate(10);
 
-        $cedis = Cedis::with('region')
-            ->byRegion($regionId)
-            ->search($search)
-            ->orderBy('nombre')
-            ->paginate(10);
-
+        // Obtener regiones para el filtro
         $regiones = Region::where('estatus', 'activo')
             ->orderBy('nombre')
             ->get();
 
-        // Pasar todas las variables necesarias a la vista
-        return view('admin.cedis.index', compact('cedis', 'regiones', 'search', 'regionId'));
+        return view('admin.cedis.index', compact('cedis', 'regiones'));
     }
 
     public function create()

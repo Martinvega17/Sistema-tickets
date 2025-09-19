@@ -42,22 +42,6 @@ class Cedis extends Model
         return $this->hasMany(User::class);
     }
 
-    // Scope para búsqueda
-    public function scopeSearch($query, $search)
-    {
-        if (!$search) return $query;
+    
 
-        return $query->where('nombre', 'LIKE', "%{$search}%")
-            ->orWhere('responsable', 'LIKE', "%{$search}%")
-            ->orWhere('direccion', 'LIKE', "%{$search}%");
-    }
-
-    // Scope para filtrar por región
-    public function scopeByRegion($query, $regionId)
-    {
-        if ($regionId) {
-            return $query->where('region_id', $regionId);
-        }
-        return $query;
-    }
 }

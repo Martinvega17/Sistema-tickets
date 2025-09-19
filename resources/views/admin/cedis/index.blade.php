@@ -40,9 +40,7 @@
                             </div>
                         </div>
                     </div>
-
                     <script>
-                        // Desaparece automáticamente después de 4 segundos
                         setTimeout(() => {
                             const banner = document.getElementById('flash-success');
                             if (banner) {
@@ -53,7 +51,6 @@
                         }, 4000);
                     </script>
                 @endif
-
 
                 @if (session('error'))
                     <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md shadow-sm">
@@ -73,60 +70,46 @@
                     </div>
                 @endif
 
-                <!-- Filters Section -->
-                <div class="mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-medium text-gray-700 mb-4">Filtros de búsqueda</h3>
-                    <form method="GET" action="{{ route('admin.cedis.index') }}">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Región</label>
-                                <select name="region_id"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border">
-                                    <option value="">Todas las regiones</option>
-                                    @foreach ($regiones as $region)
-                                        <option value="{{ $region->id }}"
-                                            {{ isset($regionId) && $regionId == $region->id ? 'selected' : '' }}>
-                                            {{ $region->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
-                                <input type="text" name="search" value="{{ $search ?? '' }}"
-                                    placeholder="Nombre, responsable..."
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border">
-                            </div>
-                            <div class="flex items-end space-x-2">
-                                <button type="submit"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors flex items-center justify-center space-x-2 shadow-sm w-full md:w-auto">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                    <span>Filtrar</span>
-                                </button>
-                                <a href="{{ route('admin.cedis.index') }}"
-                                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors flex items-center justify-center space-x-2 shadow-sm w-full md:w-auto">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    <span>Limpiar</span>
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
                 <!-- Results Count -->
                 <div class="mb-4 flex justify-between items-center">
                     <p class="text-sm text-gray-600">
-                        Mostrando <span class="font-medium">{{ $cedis->count() }}</span> de <span
-                            class="font-medium">{{ $cedis->total() }}</span> resultados
+                        Mostrando <span class="font-medium">{{ $cedis->count() }}</span> de
+                        <span class="font-medium">{{ $cedis->total() }}</span> resultados
                     </p>
+                </div>
+
+                <!-- Filters Section -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Búsqueda por texto -->
+                    <div>
+                        <label for="filtro_busqueda" class="block text-sm font-medium text-gray-700 mb-2">Buscar:</label>
+                        <input type="text" id="filtro_busqueda"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Nombre, dirección, responsable, teléfono...">
+                    </div>
+
+                    <!-- Filtro por región -->
+                    <div>
+                        <label for="filtro_region" class="block text-sm font-medium text-gray-700 mb-2">Filtrar por
+                            Region:</label>
+                        <select id="filtro_region"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Todas las regiones</option>
+                            @foreach ($regiones as $region)
+                                <option value="{{ $region->id }}">{{ $region->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contador de resultados filtrados -->
+                <div id="contador-filtrado" class="mb-4 hidden">
+                    <p class="text-sm text-blue-600">
+                        <span id="resultados-visibles">0</span> resultados coinciden con los filtros
+                    </p>
+                    <button onclick="limpiarFiltros()" class="text-sm text-gray-500 hover:text-gray-700 underline mt-1">
+                        Limpiar filtros
+                    </button>
                 </div>
 
                 <!-- Table Section -->
@@ -148,13 +131,13 @@
                                     Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200" id="tabla-cedis">
                             @foreach ($cedis as $cedi)
-                                <tr class="hover:bg-gray-50 transition-colors">
+                                <tr class="cedis-row hover:bg-gray-50 transition-colors"
+                                    data-region="{{ $cedi->region_id }}">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-semibold text-gray-900">{{ $cedi->nombre }}</div>
-                                        <div class="text-xs text-gray-500 mt-1">{{ Str::limit($cedi->direccion, 40) }}
-                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">{{ Str::limit($cedi->direccion, 40) }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900 bg-blue-50 px-2 py-1 rounded-full inline-block">
@@ -179,8 +162,8 @@
                                             <a href="{{ route('admin.cedis.edit', $cedi->id) }}"
                                                 class="text-blue-600 hover:text-blue-900 transition-colors flex items-center"
                                                 title="Editar">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
@@ -214,7 +197,6 @@
                                                 </button>
                                             </form>
 
-
                                             <form action="{{ route('admin.cedis.destroy', $cedi->id) }}" method="POST"
                                                 class="inline-block">
                                                 @csrf
@@ -247,4 +229,66 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filtroRegion = document.getElementById('filtro_region');
+            const filtroBusqueda = document.getElementById('filtro_busqueda');
+            const filasCedis = document.querySelectorAll('.cedis-row');
+            const contadorFiltrado = document.getElementById('contador-filtrado');
+            const resultadosVisiblesSpan = document.getElementById('resultados-visibles');
+
+            function aplicarFiltros() {
+                const regionId = filtroRegion.value;
+                const textoBusqueda = filtroBusqueda.value.toLowerCase().trim();
+                let resultadosVisibles = 0;
+
+                filasCedis.forEach(fila => {
+                    const regionFila = fila.getAttribute('data-region');
+                    const textoFila = fila.textContent.toLowerCase();
+
+                    // Verificar si coincide con región
+                    const coincideRegion = regionId === '' || regionFila === regionId;
+
+                    // Verificar si coincide con texto de búsqueda
+                    const coincideTexto = textoBusqueda === '' || textoFila.includes(textoBusqueda);
+
+                    if (coincideRegion && coincideTexto) {
+                        fila.style.display = '';
+                        resultadosVisibles++;
+                    } else {
+                        fila.style.display = 'none';
+                    }
+                });
+
+                // Actualizar contador
+                if (regionId !== '' || textoBusqueda !== '') {
+                    contadorFiltrado.classList.remove('hidden');
+                    resultadosVisiblesSpan.textContent = resultadosVisibles;
+                } else {
+                    contadorFiltrado.classList.add('hidden');
+                }
+            }
+
+            function limpiarFiltros() {
+                filtroRegion.value = '';
+                filtroBusqueda.value = '';
+                aplicarFiltros();
+            }
+
+            // Event listeners
+            filtroRegion.addEventListener('change', aplicarFiltros);
+            filtroBusqueda.addEventListener('input', function() {
+                // Usar debounce para no ejecutar demasiadas veces
+                clearTimeout(window.filtroTimeout);
+                window.filtroTimeout = setTimeout(aplicarFiltros, 300);
+            });
+
+            // Aplicar filtros inicialmente
+            aplicarFiltros();
+
+            // Hacer la función global para el botón de limpiar
+            window.limpiarFiltros = limpiarFiltros;
+        });
+    </script>
 @endsection
