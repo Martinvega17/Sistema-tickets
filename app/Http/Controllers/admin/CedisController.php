@@ -10,18 +10,81 @@ use Illuminate\Support\Facades\Log;
 
 class CedisController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener todos los CEDIS con sus regiones
-        $cedis = Cedis::with('region')->orderBy('nombre')->paginate(10);
+        $search = $request->input('search', '');
+        $regionId = $request->input('region_id', '');
 
         // Obtener regiones para el filtro
         $regiones = Region::where('estatus', 'activo')
             ->orderBy('nombre')
             ->get();
 
-        return view('admin.cedis.index', compact('cedis', 'regiones'));
+        // Consulta base para CEDIS
+        $cedisQuery = Cedis::with('region');
+
+        // Aplicar filtro de búsqueda por texto
+        if (!empty($search)) {
+            $cedisQuery->where(function ($query) use ($search) {
+                $query->where('nombre', 'like', "%{$search}%")
+                    ->orWhere('direccion', 'like', "%{$search}%")
+                    ->orWhere('responsable', 'like', "%{$search}%")
+                    ->orWhere('telefono', 'like', "%{$search}%");
+            });
+        }
+
+        // Aplicar filtro por región
+        if (!empty($regionId)) {
+            $cedisQuery->where('region_id', $regionId);
+        }
+
+        // Ordenar y paginar
+        $cedis = $cedisQuery->orderBy('nombre')->paginate(10);
+
+        return view('admin.cedis.index', compact('cedis', 'regiones', 'search', 'regionId'));
     }
+
+    // ✅ AGREGA ESTE MÉTODO FILTER
+    public function filter(Request $request)
+    {
+        $search = $request->input('search', '');   // valor por defecto
+        $regionId = $request->input('region_id', ''); // valor por defecto
+
+        $query = Cedis::query();
+
+        if ($regionId) {
+            $query->where('region_id', $regionId);
+        }
+
+        if ($request->has('estatus') && $request->estatus) {
+            $query->where('estatus', $request->estatus);
+        }
+
+        $cedis = $query->orderBy('nombre')->paginate(10, ['*'], 'page', $request->page ?? 1);
+
+
+        $regiones = Region::where('estatus', 'activo')->orderBy('nombre')->get();
+
+        if ($request->ajax()) {
+            $html = view('admin.cedis.partials.cedis_rows', compact('cedis'))->render();
+            $pagination_html = $cedis->links()->render();
+
+            return response()->json([
+                'html' => $html,
+                'pagination_html' => $pagination_html,
+                'pagination' => [
+                    'count' => $cedis->count(),
+                    'total' => $cedis->total()
+                ]
+            ]);
+        }
+
+        return view('admin.cedis.index', compact('cedis', 'regiones', 'search', 'regionId'));
+    }
+
+
+
+
 
     public function create()
     {

@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CedisController;
+use App\Http\Controllers\Admin\CedisController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Admin\AreaController;
@@ -111,23 +111,35 @@ Route::resource('tickets', TicketsController::class);
 Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
 
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('areas', AreaController::class);
-    Route::resource('servicios', ServicioController::class);
-    Route::resource('naturaleza', NaturalezaController::class);
-    Route::resource('categorias', CategoriaController::class);
-    Route::resource('regiones', RegionController::class);
 
-    // Rutas para CEDIS
-    Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
-    Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
-    Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
-    Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
-    Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
-    Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
-    Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('areas', AreaController::class);
+        Route::resource('servicios', ServicioController::class);
+        Route::resource('naturaleza', NaturalezaController::class);
+        Route::resource('categorias', CategoriaController::class);
+        Route::resource('regiones', RegionController::class);
+
+
+
+
+        // Rutas para CEDIS
+        Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
+        Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
+        Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
+        Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
+        Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
+        Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
+        Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
+    });
 });
+
+Route::match(['get', 'post'], '/cedis/filter', [CedisController::class, 'filter'])->name('cedis.filter');
+
+
+
+
 
 //Rutas para usarios 
 Route::middleware(['auth', 'role:3,4,5'])->group(function () {
