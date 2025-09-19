@@ -60,6 +60,17 @@ class CedisController extends Controller
             $query->where('estatus', $request->estatus);
         }
 
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                    ->orWhere('direccion', 'like', "%{$search}%")
+                    ->orWhere('responsable', 'like', "%{$search}%")
+                    ->orWhere('telefono', 'like', "%{$search}%");
+            });
+        }
+
+
         $cedis = $query->orderBy('nombre')->paginate(10, ['*'], 'page', $request->page ?? 1);
 
 
@@ -81,8 +92,6 @@ class CedisController extends Controller
 
         return view('admin.cedis.index', compact('cedis', 'regiones', 'search', 'regionId'));
     }
-
-
 
 
 
