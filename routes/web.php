@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Models\Cedis;
-use App\Models\Region;
 use Illuminate\Support\Facades\Route;
 
 
@@ -72,8 +71,8 @@ Route::middleware('auth')->group(function () {
     // Rutas para gestión de usuarios
     Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
-        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create'); // ← NUEVA RUTA
-        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store'); // ← NUEVA RUTA
+        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create'); 
+        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store'); 
         Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
         Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
     });
@@ -121,9 +120,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('categorias', CategoriaController::class);
         Route::resource('regiones', RegionController::class);
 
-
-
-
         // Rutas para CEDIS
         Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
         Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
@@ -136,9 +132,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::match(['get', 'post'], '/cedis/filter', [CedisController::class, 'filter'])->name('cedis.filter');
-
-
-
 
 
 //Rutas para usarios 
