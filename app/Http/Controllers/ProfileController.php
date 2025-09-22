@@ -12,9 +12,12 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        return view('profile.index', compact('user'));
+        $rolId = auth()->user()->rol_id;
+
+        // Roles 1 y 2 → admin, los demás → usuario normal
+        return redirect()->route('profile.personal');
     }
+
 
     public function updatePersonalData(Request $request)
     {
