@@ -145,16 +145,20 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
-                                    <input type="text" id="empresa" name="empresa" value="GEPP"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent bg-gray-50"
-                                        readonly>
+                                    <input type="text" id="empresa" name="empresa"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">País</label>
-                                    <input type="text" id="pais" name="pais" value="México"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent bg-gray-50"
-                                        readonly>
+                                    <input type="text" id="pais" name="pais"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
+                                    <input type="text" id="ubicacion" name="ubicacion"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4">
@@ -190,6 +194,20 @@
                                     </select>
                                 </div>
 
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Piso</label>
+                                        <input type="text" id="piso" name="piso"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Torre</label>
+                                        <input type="text" id="torre" name="torre"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Cargo</label>
                                     <select id="cargo" name="cargo"
@@ -198,6 +216,12 @@
                                         <option value="Tecnico">Técnico</option>
                                         <!-- Agrega más cargos según necesites -->
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Centro de Costos</label>
+                                    <input type="text" id="centro_costos" name="centro_costos"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pepsi-blue focus:border-transparent">
                                 </div>
                             </div>
                         </div>

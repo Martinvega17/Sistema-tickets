@@ -13,7 +13,6 @@ async function loadUserData(userId) {
         console.log('Response status:', response.status, response.statusText);
 
         if (!response.ok) {
-            // Obtener más detalles del error
             const errorText = await response.text();
             console.error('Error response body:', errorText);
 
@@ -29,7 +28,7 @@ async function loadUserData(userId) {
         const user = await response.json();
         console.log('Usuario cargado exitosamente:', user);
 
-        // Llenar el formulario
+        // Llenar el formulario con todos los campos
         document.getElementById('user_id').value = user.id;
         document.getElementById('nombre').value = user.nombre;
         document.getElementById('apellido').value = user.apellido;
@@ -37,6 +36,18 @@ async function loadUserData(userId) {
         document.getElementById('numero_nomina').value = user.numero_nomina;
         document.getElementById('telefono').value = user.telefono || '';
         document.getElementById('rol_id').value = user.rol_id;
+
+        // Campos de empresa (nuevos)
+        document.getElementById('empresa').value = user.empresa || '';
+        document.getElementById('pais').value = user.pais || '';
+        document.getElementById('ubicacion').value = user.ubicacion || '';
+        document.getElementById('ciudad').value = user.ciudad || '';
+        document.getElementById('estado').value = user.estado || '';
+        document.getElementById('departamento').value = user.departamento || '';
+        document.getElementById('piso').value = user.piso || '';
+        document.getElementById('torre').value = user.torre || '';
+        document.getElementById('cargo').value = user.cargo || '';
+        document.getElementById('centro_costos').value = user.centro_costos || '';
 
         // Ocultar mensaje inicial y mostrar formulario
         document.getElementById('initialMessage').classList.add('hidden');
@@ -46,8 +57,7 @@ async function loadUserData(userId) {
         document.querySelectorAll('.user-item').forEach(item => {
             item.classList.remove('bg-blue-100', 'border-pepsi-blue');
         });
-        document.querySelector(`.user-item[data-user-id="${userId}"]`).classList.add('bg-blue-100',
-            'border-pepsi-blue');
+        document.querySelector(`.user-item[data-user-id="${userId}"]`).classList.add('bg-blue-100', 'border-pepsi-blue');
 
     } catch (error) {
         console.error('Error completo:', error);
@@ -81,14 +91,26 @@ document.getElementById('userForm').addEventListener('submit', async function (e
     } else {
         // Validar que las contraseñas coincidan
         if (data.nueva_password !== data.nueva_password_confirmation) {
-            alert('Las contraseñas no coinciden');
+            showNotification('error', 'Las contraseñas no coinciden');
             return;
         }
     }
 
+    // Mostrar estado de carga
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Guardando...
+    `;
+    submitBtn.disabled = true;
+
     try {
         const response = await fetch(`/usuarios/${userId}`, {
-            method: 'POST', // Cambiado a POST para Laravel
+            method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Accept': 'application/json',
@@ -96,35 +118,123 @@ document.getElementById('userForm').addEventListener('submit', async function (e
             },
             body: JSON.stringify({
                 ...data,
-                _method: 'PUT' // Laravel necesita esto para simular PUT
+                _method: 'PUT'
             })
         });
 
         const result = await response.json();
 
         if (response.ok) {
-            alert('Usuario actualizado correctamente');
+            showNotification('success', 'Usuario actualizado correctamente');
+
             // Limpiar campos de contraseña
             document.getElementById('nueva_password').value = '';
             document.getElementById('nueva_password_confirmation').value = '';
 
-            // Recargar la lista de usuarios para reflejar cambios
-            location.reload();
+            // Opcional: recargar después de un breve delay para que se vea la notificación
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+
         } else {
             if (result.errors) {
                 const errorMessages = Object.values(result.errors).flat().join(', ');
-                alert('Error: ' + errorMessages);
+                showNotification('error', errorMessages);
             } else if (result.message) {
-                alert('Error: ' + result.message);
+                showNotification('error', result.message);
             } else {
-                alert('Error al actualizar el usuario');
+                showNotification('error', 'Error al actualizar el usuario');
             }
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexión al actualizar el usuario');
+        showNotification('error', 'Error de conexión al actualizar el usuario');
+    } finally {
+        // Restaurar estado del botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 });
+
+// Función para mostrar notificación (debes tener esta función definida)
+function showNotification(type, message) {
+    // Crear elemento de notificación si no existe
+    let notificationContainer = document.getElementById('notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        notificationContainer.className = 'fixed top-4 right-4 z-50 space-y-2';
+        document.body.appendChild(notificationContainer);
+    }
+
+    const notificationId = 'notification-' + Date.now();
+    const notification = document.createElement('div');
+    notification.id = notificationId;
+    notification.className = `transform transition-all duration-300 translate-x-0 opacity-100`;
+
+    const styles = {
+        success: {
+            bg: 'bg-green-50',
+            border: 'border-green-500',
+            text: 'text-green-800',
+            icon: '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+            title: 'Éxito'
+        },
+        error: {
+            bg: 'bg-red-50',
+            border: 'border-red-500',
+            text: 'text-red-800',
+            icon: '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+            title: 'Error'
+        }
+    };
+
+    const style = styles[type] || styles.info;
+
+    notification.innerHTML = `
+        <div class="min-w-80 bg-white rounded-lg shadow-lg border-l-4 ${style.border} p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    ${style.icon}
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-medium ${style.text}">${message}</p>
+                </div>
+                <button onclick="closeNotification('${notificationId}')" class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+
+    notificationContainer.appendChild(notification);
+
+    // Animar entrada
+    setTimeout(() => {
+        notification.classList.add('translate-x-0', 'opacity-100');
+    }, 10);
+
+    // Auto-ocultar después de 5 segundos
+    setTimeout(() => {
+        closeNotification(notificationId);
+    }, 5000);
+}
+
+// Función para cerrar notificación
+function closeNotification(id) {
+    const notification = document.getElementById(id);
+    if (notification) {
+        notification.classList.remove('translate-x-0', 'opacity-100');
+        notification.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+}
 
 // Función para resetear el formulario
 function resetForm() {
@@ -231,3 +341,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+

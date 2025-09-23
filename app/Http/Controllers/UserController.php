@@ -167,7 +167,18 @@ class UserController extends Controller
                 'rol_id' => $user->rol_id,
                 'region_id' => $user->region_id,
                 'cedis_id' => $user->cedis_id,
-                'estatus' => $user->estatus
+                'estatus' => $user->estatus,
+                // Campos de empresa
+                'empresa' => $user->empresa,
+                'pais' => $user->pais,
+                'ubicacion' => $user->ubicacion,
+                'ciudad' => $user->ciudad,
+                'estado' => $user->estado,
+                'departamento' => $user->departamento,
+                'piso' => $user->piso,
+                'torre' => $user->torre,
+                'cargo' => $user->cargo,
+                'centro_costos' => $user->centro_costos
             ]);
         }
 
@@ -189,7 +200,18 @@ class UserController extends Controller
             'numero_nomina' => 'required|string|max:50|unique:users,numero_nomina,' . $user->id,
             'telefono' => 'nullable|string|max:20',
             'rol_id' => 'required|exists:roles,id',
-            'nueva_password' => 'nullable|min:8|confirmed', // Validación para nueva contraseña
+            'nueva_password' => 'nullable|min:8|confirmed',
+            // Agregar validación para campos de empresa
+            'empresa' => 'nullable|string|max:255',
+            'pais' => 'nullable|string|max:100',
+            'ubicacion' => 'nullable|string|max:255',
+            'ciudad' => 'nullable|string|max:100',
+            'estado' => 'nullable|string|max:100',
+            'departamento' => 'nullable|string|max:100',
+            'piso' => 'nullable|string|max:50',
+            'torre' => 'nullable|string|max:50',
+            'cargo' => 'nullable|string|max:100',
+            'centro_costos' => 'nullable|string|max:100',
         ], [
             'nueva_password.confirmed' => 'La confirmación de la contraseña no coincide.',
             'nueva_password.min' => 'La contraseña debe tener al menos 8 caracteres.',
@@ -199,7 +221,7 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Actualizar datos básicos
+        // Actualizar datos básicos incluyendo campos de empresa
         $user->update($request->only([
             'nombre',
             'apellido',
@@ -208,7 +230,17 @@ class UserController extends Controller
             'telefono',
             'rol_id',
             'region_id',
-            'cedis_id'
+            'cedis_id',
+            'empresa',
+            'pais',
+            'ubicacion',
+            'ciudad',
+            'estado',
+            'departamento',
+            'piso',
+            'torre',
+            'cargo',
+            'centro_costos'
         ]));
 
         // Actualizar contraseña si se proporcionó
@@ -217,7 +249,10 @@ class UserController extends Controller
             $user->save();
         }
 
-        return response()->json(['message' => 'Usuario actualizado correctamente']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario actualizado correctamente'
+        ]);
     }
 
     // Método para la vista de edición

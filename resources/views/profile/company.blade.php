@@ -346,27 +346,60 @@
             }
 
             // Función para mostrar notificaciones mejorada
+            // Función para mostrar notificación mejorada con Tailwind
             function showNotification(type, message) {
-                // Usar toastr si está disponible
-                if (typeof toastr !== 'undefined') {
-                    toastr[type](message);
+                // Crear elemento de notificación si no existe
+                let notification = document.getElementById('custom-notification');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.id = 'custom-notification';
+                    notification.className = 'fixed top-4 right-4 z-50 max-w-sm w-full';
+                    document.body.appendChild(notification);
                 }
-                // Si no, usar SweetAlert si está disponible
-                else if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: type,
-                        title: type === 'success' ? 'Éxito' : 'Error',
-                        text: message,
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000
-                    });
-                }
-                // Si no hay librerías de notificación, usar alertas nativas
-                else {
-                    alert(`${type.toUpperCase()}: ${message}`);
-                }
+
+                const borderColors = {
+                    'success': 'border-green-500',
+                    'error': 'border-red-500',
+                    'warning': 'border-yellow-500',
+                    'info': 'border-blue-500'
+                };
+
+                const icons = {
+                    'success': '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+                    'error': '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+                    'warning': '<svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>',
+                    'info': '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                };
+
+                const title = type === 'success' ? 'Éxito' : type === 'error' ? 'Error' : type === 'warning' ?
+                    'Advertencia' : 'Información';
+
+                notification.innerHTML = `
+        <div class="bg-white rounded-lg shadow-lg border-l-4 ${borderColors[type]} p-4 transform transition-all duration-300 translate-x-0 opacity-100">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    ${icons[type]}
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-gray-900">${title}</h3>
+                    <p class="text-sm text-gray-600">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+
+                // Ocultar automáticamente después de 5 segundos
+                setTimeout(() => {
+                    if (notification.innerHTML) {
+                        notification.querySelector('div').classList.add('translate-x-full', 'opacity-0');
+                        setTimeout(() => notification.innerHTML = '', 300);
+                    }
+                }, 5000);
             }
         });
     </script>
