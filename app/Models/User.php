@@ -80,4 +80,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Tickets::class, 'ingeniero_asignado_id');
     }
+    
 }

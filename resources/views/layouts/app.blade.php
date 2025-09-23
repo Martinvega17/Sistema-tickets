@@ -22,6 +22,19 @@
                 }
             }
         }
+
+        @keyframes slide - in {
+                0 % {
+                    transform: translateX(100 % );opacity: 0;
+                }
+                100 % {
+                    transform: translateX(0);opacity: 1;
+                }
+            }
+
+            .animate - slide - in {
+                animation: slide - in 0.5 s ease forwards;
+            }
     </script>
     <style>
         .pepsi-gradient {
@@ -173,6 +186,7 @@
             @yield('content')
         </main>
     </div>
+    <div id="toast-container" class="fixed bottom-5 right-5 space-y-2 z-50"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -206,6 +220,7 @@
             });
         });
     </script>
+
 </body>
 
 </html>

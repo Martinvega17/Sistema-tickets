@@ -6,31 +6,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\User;
 
 class ProfileController extends Controller
 {
     public function index()
     {
-        $rolId = auth()->user()->rol_id;
-
-        // Roles 1 y 2 → admin, los demás → usuario normal
         return redirect()->route('profile.personal');
     }
 
+    protected function getUser(): User
+    {
+        // Garantiza que siempre devolvemos un modelo Eloquent
+        return User::findOrFail(Auth::id());
+    }
 
     public function updatePersonalData(Request $request)
     {
-        $user = Auth::user();
+        $user = $this->getUser();
 
-        // Definir reglas de validación según el rol
         $validationRules = [
             'telefono' => 'nullable|string|max:20',
             'genero' => 'nullable|string|in:Masculino,Femenino,Otro',
         ];
 
-        // Si es admin o supervisor, puede editar más campos
-        if ($user->rol_id == 1 || $user->rol_id == 2) {
+        if (in_array($user->rol_id, [1, 2])) {
             $validationRules = array_merge($validationRules, [
                 'nombre' => 'required|string|max:100',
                 'apellido' => 'required|string|max:100',
@@ -46,11 +46,11 @@ class ProfileController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Actualizar datos según permisos
+        // Actualización de campos
         $user->telefono = $request->telefono;
         $user->genero = $request->genero;
 
-        if ($user->rol_id == 1 || $user->rol_id == 2) {
+        if (in_array($user->rol_id, [1, 2])) {
             $user->nombre = $request->nombre;
             $user->apellido = $request->apellido;
             $user->email = $request->email;
@@ -65,10 +65,9 @@ class ProfileController extends Controller
 
     public function updateCompanyData(Request $request)
     {
-        $user = Auth::user();
+        $user = $this->getUser();
 
-        // Solo admin y supervisor pueden editar
-        if ($user->rol_id != 1 && $user->rol_id != 2) {
+        if (!in_array($user->rol_id, [1, 2])) {
             return response()->json(['error' => 'No tienes permisos para editar esta información'], 403);
         }
 
@@ -89,38 +88,59 @@ class ProfileController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($request->all());
+        $user->update($request->only([
+            'empresa',
+            'pais',
+            'ubicacion',
+            'ciudad',
+            'estado',
+            'departamento',
+            'piso',
+            'torre',
+            'cargo',
+            'centro_costos'
+        ]));
 
         return response()->json(['message' => 'Información de empresa actualizada correctamente']);
     }
 
     public function updatePassword(Request $request)
     {
+        $user = $this->getUser();
+
         $validator = Validator::make($request->all(), [
             'current_password' => 'required',
             'new_password' => 'required|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        $user = Auth::user();
-
-        // Verificar contraseña actual
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['errors' => ['current_password' => ['La contraseña actual no es correcta']]], 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña actual es incorrecta'
+            ], 422);
         }
 
-        // Actualizar contraseña
         $user->password = Hash::make($request->new_password);
         $user->save();
 
-        return response()->json(['message' => 'Contraseña actualizada correctamente']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña cambiada correctamente'
+        ]);
     }
+
 
     public function updateLanguage(Request $request)
     {
+        $user = $this->getUser();
+
         $validator = Validator::make($request->all(), [
             'idioma' => 'required|in:ES,EN,PT',
         ]);
@@ -129,29 +149,27 @@ class ProfileController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user = Auth::user();
         $user->idioma = $request->idioma;
         $user->save();
 
         return response()->json(['message' => 'Idioma actualizado correctamente']);
     }
 
-
     public function personal()
     {
-        $user = Auth::user();
+        $user = $this->getUser();
         return view('profile.personal', compact('user'));
     }
 
     public function company()
     {
-        $user = Auth::user();
+        $user = $this->getUser();
         return view('profile.company', compact('user'));
     }
 
     public function password()
     {
-        $user = Auth::user();
+        $user = $this->getUser();
         return view('profile.password', compact('user'));
     }
 }

@@ -71,8 +71,8 @@ Route::middleware('auth')->group(function () {
     // Rutas para gestión de usuarios
     Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
-        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create'); 
-        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store'); 
+        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create');
+        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store');
         Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
         Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
     });
@@ -146,8 +146,10 @@ Route::prefix('profile')->group(function () {
     Route::get('/company', [ProfileController::class, 'company'])->name('profile.company');
     Route::get('/password', [ProfileController::class, 'password'])->name('profile.password');
 
+    // SOLO UNA RUTA POST PARA PASSWORD
+    Route::post('/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+
     Route::post('/personal', [ProfileController::class, 'updatePersonalData'])->name('profile.updatePersonal');
     Route::post('/company', [ProfileController::class, 'updateCompanyData'])->name('profile.updateCompany');
-    Route::post('/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
     Route::post('/language', [ProfileController::class, 'updateLanguage'])->name('profile.updateLanguage');
 });

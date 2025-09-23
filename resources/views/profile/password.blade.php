@@ -10,6 +10,8 @@
 @section($section)
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- DEBUG: Mostrar mensajes de sesión directamente en HTML -->
+
             <!-- Header -->
             <div class="mb-8">
                 <h1 class="text-2xl font-bold text-gray-900">Configuración de Perfil</h1>
@@ -55,6 +57,8 @@
                             </a>
                         </nav>
                     </div>
+                    <div id="alert-container"></div>
+
 
                     <!-- Tarjeta de información del usuario -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 mt-6 p-5">
@@ -93,6 +97,7 @@
 
                         <div class="p-6">
                             <form id="passwordForm" class="space-y-6">
+
                                 @csrf
 
                                 <div>
@@ -119,10 +124,9 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <i class="fas fa-lock text-gray-400"></i>
                                         </div>
-                                        <input type="password"
+                                        <input type="password" id="new_password" name="new_password"
                                             class="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                            name="new_password" required minlength="8"
-                                            placeholder="Crea una nueva contraseña">
+                                            required minlength="8" placeholder="Crea una nueva contraseña">
                                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                             <button type="button"
                                                 class="text-gray-400 hover:text-gray-500 focus:outline-none toggle-password">
@@ -130,8 +134,6 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-2">La contraseña debe tener al menos 8 caracteres,
-                                        incluyendo letras y números.</p>
                                 </div>
 
                                 <div>
@@ -141,10 +143,10 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <i class="fas fa-lock text-gray-400"></i>
                                         </div>
-                                        <input type="password"
+                                        <input type="password" id="new_password_confirmation"
+                                            name="new_password_confirmation"
                                             class="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                            name="new_password_confirmation" required
-                                            placeholder="Confirma tu nueva contraseña">
+                                            required placeholder="Confirma tu nueva contraseña">
                                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                             <button type="button"
                                                 class="text-gray-400 hover:text-gray-500 focus:outline-none toggle-password">
@@ -172,6 +174,7 @@
                                         </li>
                                     </ul>
                                 </div>
+
 
                                 <div class="pt-4 border-t border-gray-200 flex justify-end">
                                     <button type="submit"
@@ -218,98 +221,62 @@
     </div>
 @endsection
 
-@section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Manejar envío del formulario de cambio de contraseña
-            const passwordForm = document.getElementById('passwordForm');
-            if (passwordForm) {
-                passwordForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('passwordForm');
+        const toastContainer = document.getElementById('toast-container');
 
-                    // Mostrar estado de carga
-                    const submitBtn = passwordForm.querySelector('button[type="submit"]');
-                    const originalText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Cambiando...';
-                    submitBtn.disabled = true;
+        function showToast(message, type = 'success', duration = 4000) {
+            const toast = document.createElement('div');
+            toast.className = `
+            px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3
+            ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
+            animate-slide-in
+        `;
+            toast.innerHTML = `
+            <span>${message}</span>
+            <button class="ml-auto font-bold" onclick="this.parentElement.remove()">×</button>
+        `;
+            toastContainer.appendChild(toast);
 
-                    fetch('{{ route('profile.updatePassword') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: new URLSearchParams(new FormData(this))
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Error en la respuesta del servidor');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.message) {
-                                showNotification('success', data.message);
-                                this.reset();
-                            } else if (data.errors) {
-                                for (const key in data.errors) {
-                                    showNotification('error', data.errors[key][0]);
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showNotification('error', 'Error al cambiar la contraseña');
-                        })
-                        .finally(() => {
-                            // Restaurar estado del botón
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        });
+            // Auto remove after duration
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, duration);
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            try {
+                const res = await fetch("{{ route('profile.password') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
                 });
-            }
 
-            // Función para mostrar/ocultar contraseña
-            document.querySelectorAll('.toggle-password').forEach(button => {
-                button.addEventListener('click', function() {
-                    const input = this.closest('.relative').querySelector('input');
-                    const icon = this.querySelector('i');
+                const data = await res.json();
 
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    form.reset();
+                } else {
+                    if (data.errors) {
+                        const firstError = Object.values(data.errors)[0][0];
+                        showToast(firstError, 'error');
                     } else {
-                        input.type = 'password';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
+                        showToast(data.message || 'Error desconocido', 'error');
                     }
-                });
-            });
-
-            // Función para mostrar notificaciones mejorada
-            function showNotification(type, message) {
-                // Usar toastr si está disponible
-                if (typeof toastr !== 'undefined') {
-                    toastr[type](message);
                 }
-                // Si no, usar SweetAlert si está disponible
-                else if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: type,
-                        title: type === 'success' ? 'Éxito' : 'Error',
-                        text: message,
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000
-                    });
-                }
-                // Si no hay librerías de notificación, usar alertas nativas
-                else {
-                    alert(`${type.toUpperCase()}: ${message}`);
-                }
+            } catch (err) {
+                showToast('Ocurrió un error en la petición', 'error');
+                console.error(err);
             }
         });
-    </script>
-@endsection
+    });
+</script>

@@ -250,10 +250,13 @@ class UserController extends Controller
         }
 
         return response()->json([
+            
             'success' => true,
             'message' => 'Usuario actualizado correctamente'
         ]);
     }
+
+    
 
     // Método para la vista de edición
     public function edit()

@@ -1,4 +1,5 @@
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+    
     <div class="modal-dialog modal-md">
         <div class="modal-content rounded-xl border-0 shadow-xl">
             <!-- Header -->
