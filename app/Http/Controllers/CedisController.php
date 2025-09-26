@@ -267,4 +267,72 @@ class CedisController extends Controller
             ->orderBy('nombre')
             ->get(['id', 'numero_nomina', 'nombre', 'apellido', 'rol_id']);
     }
+
+    // En CedisController.php, modifica o crea este método:
+    public function filter(Request $request)
+    {
+        try {
+            $this->checkAdminSupervisorPermission();
+
+            $search = $request->input('search');
+            $regionId = $request->input('region_id');
+            $page = $request->input('page', 1);
+
+            $query = Cedis::with(['region', 'ingeniero']);
+
+            // Aplicar filtros
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nombre', 'like', "%$search%")
+                        ->orWhere('direccion', 'like', "%$search%")
+                        ->orWhere('responsable', 'like', "%$search%")
+                        ->orWhere('telefono', 'like', "%$search%");
+                });
+            }
+
+            if ($regionId) {
+                $query->where('region_id', $regionId);
+            }
+
+            $cedis = $query->orderBy('nombre')->paginate(10, ['*'], 'page', $page);
+
+            // Añadir parámetros de filtro a los links de paginación
+            $cedis->appends([
+                'search' => $search,
+                'region_id' => $regionId
+            ]);
+
+            // Si es una petición AJAX, retornar JSON
+            if ($request->ajax()) {
+                $html = view('admin.cedis.partials.cedis_rows', compact('cedis'))->render();
+                $paginationHtml = $cedis->links()->toHtml();
+
+                return response()->json([
+                    'html' => $html,
+                    'pagination_html' => $paginationHtml,
+                    'pagination' => [
+                        'current_page' => $cedis->currentPage(),
+                        'last_page' => $cedis->lastPage(),
+                        'total' => $cedis->total(),
+                        'count' => $cedis->count()
+                    ],
+                    'filters' => [
+                        'search' => $search,
+                        'region_id' => $regionId
+                    ]
+                ]);
+            }
+
+            // Si no es AJAX, retornar vista normal (para la paginación tradicional)
+            return view('admin.cedis.index', compact('cedis'));
+        } catch (\Exception $e) {
+            Log::error('Error en filter:', ['message' => $e->getMessage()]);
+
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Error al filtrar los datos'], 500);
+            }
+
+            return back()->with('error', 'Error al filtrar los datos');
+        }
+    }
 }

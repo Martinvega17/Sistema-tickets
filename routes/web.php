@@ -128,10 +128,12 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
         Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
         Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
+
+        // ✅ CORREGIR ESTA LÍNEA - quita el 'admin.' extra
+        Route::post('/cedis/filter', [CedisController::class, 'filter'])->name('admin.cedis.filter');
     });
 });
 
-Route::match(['get', 'post'], '/cedis/filter', [CedisController::class, 'filter'])->name('cedis.filter');
 
 
 //Rutas para usarios 

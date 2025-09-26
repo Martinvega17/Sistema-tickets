@@ -111,15 +111,15 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nombre / Dirección</th>
+                                    Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Direccion</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Región</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Responsable</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Teléfono</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Estado</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Acciones</th>
                             </tr>
@@ -141,7 +141,6 @@
     <!-- JavaScript para AJAX -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-
             // ===== Obtener token CSRF =====
             function getCsrfToken() {
                 const metaTag = document.querySelector('meta[name="csrf-token"]');
@@ -164,12 +163,18 @@
 
             let currentPage = 1;
             let searchTimeout;
+            let currentFilters = {
+                search: '',
+                region_id: ''
+            };
 
             // ===== Función principal para cargar CEDIS vía AJAX =====
             function cargarCedis(page = 1) {
                 currentPage = page;
-                const search = searchInput.value;
-                const regionId = regionSelect.value;
+                currentFilters.search = searchInput.value;
+                currentFilters.region_id = regionSelect.value;
+
+                console.log('Cargando página:', page, 'con filtros:', currentFilters);
 
                 // Mostrar loading
                 loading.classList.remove('hidden');
@@ -185,7 +190,10 @@
             </td>
         </tr>`;
 
-                fetch("{{ route('cedis.filter') }}", {
+                // Usar URL directa para evitar problemas con las rutas
+                const url = '/admin/cedis/filter';
+
+                fetch(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -193,41 +201,78 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify({
-                            search: search,
-                            region_id: regionId,
+                            search: currentFilters.search,
+                            region_id: currentFilters.region_id,
                             page: page
                         })
                     })
                     .then(response => {
-                        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`Error HTTP: ${response.status}`);
+                        }
                         return response.json();
                     })
                     .then(data => {
-                        if (data.error) throw new Error(data.error);
+                        console.log('Datos recibidos:', data);
+
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
 
                         // Actualizar tabla y paginación
                         tableBody.innerHTML = data.html;
                         pagination.innerHTML = data.pagination_html;
 
+                        // Re-attach event listeners a los nuevos enlaces de paginación
+                        attachPaginationListeners();
+
                         // Actualizar contadores
                         resultCount.textContent = data.pagination.count || 0;
                         totalCount.textContent = data.pagination.total;
 
+                        // Actualizar filtros actuales
+                        if (data.filters) {
+                            currentFilters = data.filters;
+                        }
+
                         // Indicador de filtrado
-                        if (search || regionId) filteredIndicator.classList.remove('hidden');
-                        else filteredIndicator.classList.add('hidden');
+                        if (currentFilters.search || currentFilters.region_id) {
+                            filteredIndicator.classList.remove('hidden');
+                        } else {
+                            filteredIndicator.classList.add('hidden');
+                        }
 
                         loading.classList.add('hidden');
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Error en fetch:', error);
                         tableBody.innerHTML = `<tr>
-                <td colspan="6" class="px-6 py-4 text-center text-red-500">
-                    Error al cargar los datos: ${error.message}
-                </td>
-            </tr>`;
+                    <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                        Error al cargar los datos: ${error.message}
+                    </td>
+                </tr>`;
                         loading.classList.add('hidden');
                     });
+            }
+
+            // ===== Función para adjuntar listeners de paginación =====
+            function attachPaginationListeners() {
+                const paginationLinks = document.querySelectorAll('#pagination a');
+
+                paginationLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        // Extraer número de página del href
+                        const url = new URL(this.href);
+                        const pageParam = url.searchParams.get('page');
+                        const page = pageParam ? parseInt(pageParam) : 1;
+
+                        console.log('Cambiando a página:', page);
+                        cargarCedis(page);
+                    });
+                });
             }
 
             // ===== Eventos =====
@@ -246,16 +291,11 @@
 
             regionSelect.addEventListener('change', () => cargarCedis(1));
 
-            // Delegación de eventos para paginación AJAX
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.pagination a')) {
-                    e.preventDefault();
-                    const url = new URL(e.target.closest('a').href);
-                    const page = url.searchParams.get('page') || 1;
-                    cargarCedis(page); // aquí envías POST con la página correcta
-                }
-            });
+            // Adjuntar listeners iniciales
+            attachPaginationListeners();
 
+            // Cargar datos iniciales
+            cargarCedis(1);
         });
     </script>
 
