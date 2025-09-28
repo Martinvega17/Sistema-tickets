@@ -21,10 +21,13 @@
                     </div>
                 </div>
 
+
+
                 <!-- Form Section -->
                 <form action="{{ route('admin.cedis.update', $cedis->id) }}" method="POST">
                     @csrf
                     @method('PUT')
+
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div>
@@ -76,11 +79,37 @@
                             @enderror
                         </div>
 
+                        <!-- CAMPO RESPONSABLE CORREGIDO -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Responsable</label>
-                            <input type="text" name="responsable" value="{{ old('responsable', $cedis->responsable) }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('responsable') border-red-500 @enderror"
-                                placeholder="Nombre del responsable">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Responsable (Ingeniero de
+                                Soporte)</label>
+
+                            @if ($ingenieros->count() > 0)
+                                <select name="responsable"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('responsable') border-red-500 @enderror">
+                                    <option value="">Seleccione un ingeniero</option>
+                                    @foreach ($ingenieros as $ingeniero)
+                                        @php
+                                            $nombreCompleto = $ingeniero->nombre . ' ' . $ingeniero->apellido;
+                                        @endphp
+                                        <option value="{{ $nombreCompleto }}"
+                                            {{ old('responsable', $cedis->responsable) == $nombreCompleto ? 'selected' : '' }}>
+                                            {{ $nombreCompleto }} ({{ $ingeniero->numero_nomina }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                                    <p class="text-yellow-800 text-sm">
+                                        No hay ingenieros disponibles. Ingrese manualmente:
+                                    </p>
+                                    <input type="text" name="responsable"
+                                        value="{{ old('responsable', $cedis->responsable) }}"
+                                        class="w-full mt-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
+                                        placeholder="Nombre del responsable">
+                                </div>
+                            @endif
+
                             @error('responsable')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror

@@ -123,6 +123,7 @@ Route::middleware(['auth'])->group(function () {
         // Rutas para CEDIS
         Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
         Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
+
         Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
         Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
         Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');

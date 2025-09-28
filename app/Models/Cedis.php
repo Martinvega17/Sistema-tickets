@@ -11,7 +11,6 @@ class Cedis extends Model
 
     protected $fillable = [
         'nombre',
-        'codigo',
         'direccion',
         'telefono',
         'responsable',
@@ -41,7 +40,4 @@ class Cedis extends Model
     {
         return $this->hasMany(User::class);
     }
-
-    
-
 }
