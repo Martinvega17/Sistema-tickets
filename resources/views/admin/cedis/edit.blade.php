@@ -34,7 +34,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Región <span
                                     class="text-red-500">*</span></label>
                             <select name="region_id" required
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('region_id') border-red-500 @enderror">
+                                class="w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('region_id') border-red-500 @enderror">
                                 <option value="">Seleccione una región</option>
                                 @foreach ($regiones as $region)
                                     <option value="{{ $region->id }}"
@@ -52,7 +52,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nombre <span
                                     class="text-red-500">*</span></label>
                             <input type="text" name="nombre" value="{{ old('nombre', $cedis->nombre) }}" required
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('nombre') border-red-500 @enderror"
+                                class="w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('nombre') border-red-500 @enderror"
                                 placeholder="Nombre del CEDIS">
                             @error('nombre')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -62,7 +62,7 @@
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
                             <textarea name="direccion" rows="3"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('direccion') border-red-500 @enderror"
+                                class="w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('direccion') border-red-500 @enderror"
                                 placeholder="Dirección completa del CEDIS">{{ old('direccion', $cedis->direccion) }}</textarea>
                             @error('direccion')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -72,7 +72,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                             <input type="text" name="telefono" value="{{ old('telefono', $cedis->telefono) }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('telefono') border-red-500 @enderror"
+                                class="w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('telefono') border-red-500 @enderror"
                                 placeholder="Número de teléfono">
                             @error('telefono')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -86,7 +86,7 @@
 
                             @if ($ingenieros->count() > 0)
                                 <select name="responsable"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('responsable') border-red-500 @enderror">
+                                    class="w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('responsable') border-red-500 @enderror">
                                     <option value="">Seleccione un ingeniero</option>
                                     @foreach ($ingenieros as $ingeniero)
                                         @php
@@ -119,7 +119,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Estatus <span
                                     class="text-red-500">*</span></label>
                             <select name="estatus" required
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('estatus') border-red-500 @enderror">
+                                class="w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('estatus') border-red-500 @enderror">
                                 <option value="activo" {{ old('estatus', $cedis->estatus) == 'activo' ? 'selected' : '' }}>
                                     Activo</option>
                                 <option value="inactivo"
