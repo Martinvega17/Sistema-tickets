@@ -109,6 +109,11 @@ Route::middleware('auth')->group(function () {
 Route::resource('tickets', TicketsController::class);
 Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/tickets/{id}', [TicketsController::class, 'show'])->name('tickets.show');
+    Route::post('/tickets/{ticketId}/notes', [TicketsController::class, 'storeNote'])->name('tickets.notes.store');
+    Route::post('/tickets/{ticketId}/assign', [TicketsController::class, 'assign'])->name('tickets.assign');
+});
 
 
 Route::middleware(['auth'])->group(function () {

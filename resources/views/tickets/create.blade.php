@@ -1,358 +1,307 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Crear Ticket - Pepsi')
+@section('title', 'Crear Nuevo Ticket')
 
-@section('content')
-    <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <!-- Header con logo de Pepsi -->
-        <div class="mb-6 flex items-center">
-            <div class="w-10 h-10 bg-pepsi-blue rounded-full flex items-center justify-center mr-3">
-                <span class="text-white font-bold text-lg">P</span>
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Crear Nuevo Ticket</h1>
-                <p class="mt-1 text-sm text-gray-600">Complete todos los campos requeridos para crear un nuevo ticket de
-                    soporte.</p>
+@section('content.dashboard')
+    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
+            <div class="p-6 bg-white">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 pb-4 border-b border-gray-100">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Crear Nuevo Ticket</h2>
+                        <p class="text-sm text-gray-500 mt-1">Reporte un problema o solicite soporte técnico</p>
+                    </div>
+                    <a href="{{ route('tickets.index') }}"
+                        class="mt-4 md:mt-0 inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Volver al listado
+                    </a>
+                </div>
+
+                <!-- Información del usuario actual -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                    <h3 class="text-sm font-medium text-blue-800 mb-2">Información del solicitante</h3>
+                    <p class="text-sm text-blue-700">
+                        <strong>Usuario:</strong> {{ Auth::user()->nombre }} {{ Auth::user()->apellido }}<br>
+                        <strong>Nómina:</strong> {{ Auth::user()->numero_nomina }}<br>
+                        <strong>Fecha:</strong> {{ now()->format('d/m/Y H:i') }}
+                    </p>
+                </div>
+
+                <!-- Form Section -->
+                <form action="{{ route('tickets.store') }}" method="POST">
+                    @csrf
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <!-- Información Básica -->
+                        <div class="md:col-span-2">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Información del Reporte</h3>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Título del Reporte <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="titulo" value="{{ old('titulo') }}" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('titulo') border-red-500 @enderror"
+                                placeholder="Ej: Problema con equipo de cómputo, Solicitud de software, etc.">
+                            @error('titulo')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descripción Detallada <span
+                                    class="text-red-500">*</span></label>
+                            <textarea name="descripcion" rows="5" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('descripcion') border-red-500 @enderror"
+                                placeholder="Describa detalladamente el problema o solicitud. Incluya cualquier información que pueda ayudar a resolverlo más rápido.">{{ old('descripcion') }}</textarea>
+                            @error('descripcion')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div class="md:col-span-2 mt-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Ubicación del Problema</h3>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Región <span
+                                    class="text-red-500">*</span></label>
+                            <select name="region_id" id="region_id" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('region_id') border-red-500 @enderror">
+                                <option value="">Seleccione la región</option>
+                                @foreach ($regiones as $region)
+                                    <option value="{{ $region->id }}"
+                                        {{ old('region_id') == $region->id ? 'selected' : '' }}>
+                                        {{ $region->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('region_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">CEDIS/Planta <span
+                                    class="text-red-500">*</span></label>
+                            <select name="cedis_id" id="cedis_id" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('cedis_id') border-red-500 @enderror">
+                                <option value="">Primero seleccione una región</option>
+                                <!-- Los CEDIS se cargarán via AJAX según la región seleccionada -->
+                            </select>
+                            @error('cedis_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Área <span
+                                    class="text-red-500">*</span></label>
+                            <select name="area_id" id="area_id" required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('area_id') border-red-500 @enderror">
+                                <option value="">Seleccione el área</option>
+                                @foreach ($areas as $area)
+                                    <option value="{{ $area->id }}"
+                                        {{ old('area_id') == $area->id ? 'selected' : '' }}>
+                                        {{ $area->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('area_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Servicio</label>
+                            <select name="servicio_id" id="servicio_id"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('servicio_id') border-red-500 @enderror">
+                                <option value="">Seleccione el servicio</option>
+                                <!-- Los servicios se cargarán via AJAX según el área seleccionada -->
+                            </select>
+                            @error('servicio_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Información Adicional -->
+                        <div class="md:col-span-2 mt-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Información Adicional</h3>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones Adicionales
+                                (Opcional)</label>
+                            <textarea name="observaciones" rows="3"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border @error('observaciones') border-red-500 @enderror"
+                                placeholder="Agregue cualquier información adicional que considere relevante.">{{ old('observaciones') }}</textarea>
+                            @error('observaciones')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Información sobre el proceso -->
+                    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
+                        <h3 class="text-sm font-medium text-green-800 mb-2">¿Qué sucede después?</h3>
+                        <ul class="text-sm text-green-700 list-disc list-inside space-y-1">
+                            <li>El ticket será asignado automáticamente a Mesa de Control (Rol 2)</li>
+                            <li>Mesa de Control revisará y asignará al ingeniero correspondiente según la región</li>
+                            <li>Recibirá notificaciones sobre el progreso de su ticket</li>
+                            <li>Puede consultar el estatus en cualquier momento desde esta plataforma</li>
+                        </ul>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div
+                        class="flex flex-col-reverse md:flex-row md:justify-end md:space-x-3 space-y-3 md:space-y-0 pt-6 border-t border-gray-200">
+                        <a href="{{ route('tickets.index') }}"
+                            class="inline-flex justify-center items-center px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancelar
+                        </a>
+                        <button type="submit"
+                            class="inline-flex justify-center items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Crear Ticket
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-
-        <!-- Formulario con colores de Pepsi -->
-        <form action="{{ route('tickets.store') }}" method="POST"
-            class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
-            @csrf
-
-            <div class="p-6 space-y-8">
-                <!-- Sección de Información Básica -->
-                <div class="bg-gradient-to-r from-pepsi-blue/5 to-blue-50 p-5 rounded-lg border border-pepsi-blue/10">
-                    <h2 class="text-lg font-semibold text-pepsi-blue flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        Información Básica del Ticket
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                        <!-- Campo de Título -->
-                        <div class="md:col-span-2">
-                            <label for="titulo" class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
-                            <input type="text" name="titulo" id="titulo" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors"
-                                placeholder="Ingrese el título del ticket">
-                        </div>
-
-                        <!-- Campo de Descripción -->
-                        <div class="md:col-span-2">
-                            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción
-                                *</label>
-                            <textarea name="descripcion" id="descripcion" rows="4" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors"
-                                placeholder="Describa detalladamente el problema o solicitud"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección de Clasificación -->
-                <div class="bg-gradient-to-r from-pepsi-blue/5 to-blue-50 p-5 rounded-lg border border-pepsi-blue/10">
-                    <h2 class="text-lg font-semibold text-pepsi-blue flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
-                            </path>
-                        </svg>
-                        Información de Clasificación
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                        <!-- Área y Servicio -->
-                        <div>
-                            <label for="area_id" class="block text-sm font-medium text-gray-700 mb-1">Área *</label>
-                            <select name="area_id" id="area_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione un área</option>
-                                @foreach ($areas as $area)
-                                    <option value="{{ $area->id }}">{{ $area->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="servicio_id" class="block text-sm font-medium text-gray-700 mb-1">Servicio *</label>
-                            <select name="servicio_id" id="servicio_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione un servicio</option>
-                                <!-- Los servicios se cargarán dinámicamente via AJAX -->
-                            </select>
-                        </div>
-
-                        <!-- Naturaleza y Tipo de Naturaleza -->
-                        <div>
-                            <label for="naturaleza_id" class="block text-sm font-medium text-gray-700 mb-1">Naturaleza
-                                *</label>
-                            <select name="naturaleza_id" id="naturaleza_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione la naturaleza</option>
-                                @foreach ($naturalezas as $naturaleza)
-                                    <option value="{{ $naturaleza->id }}">{{ $naturaleza->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Categoría y Grupo de Trabajo -->
-                        <div>
-                            <label for="categoria_id" class="block text-sm font-medium text-gray-700 mb-1">Categoría
-                                *</label>
-                            <select name="categoria_id" id="categoria_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione una categoría</option>
-                                @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="grupo_trabajo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo de
-                                Trabajo *</label>
-                            <select name="grupo_trabajo_id" id="grupo_trabajo_id"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione un grupo</option>
-                                @foreach ($gruposTrabajo as $grupo)
-                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Actividad y Responsable -->
-                        <div>
-                            <label for="actividad_id" class="block text-sm font-medium text-gray-700 mb-1">Actividad
-                                *</label>
-                            <select name="actividad_id" id="actividad_id"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione una actividad</option>
-                                @foreach ($actividades as $actividad)
-                                    <option value="{{ $actividad->id }}">{{ $actividad->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="responsable_id" class="block text-sm font-medium text-gray-700 mb-1">Responsable
-                                *</label>
-                            <select name="responsable_id" id="responsable_id" required
-                                class="w-full px-4- py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione un responsable</option>
-                                @foreach ($responsables as $responsable)
-                                    <option value="{{ $responsable->id }}">{{ $responsable->nombre }}
-                                        {{ $responsable->apellido }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección de Prioridad e Impacto -->
-                <div class="bg-gradient-to-r from-pepsi-blue/5 to-blue-50 p-5 rounded-lg border border-pepsi-blue/10">
-                    <h2 class="text-lg font-semibold text-pepsi-blue flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd"
-                                d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        Prioridad e Impacto
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                        <!-- Impacto, Prioridad y Urgencia -->
-                        <div>
-                            <label for="impacto" class="block text-sm font-medium text-gray-700 mb-1">Impacto *</label>
-                            <select name="impacto" id="impacto" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="Baja">Baja</option>
-                                <option value="Media" selected>Media</option>
-                                <option value="Alta">Alta</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="prioridad" class="block text-sm font-medium text-gray-700 mb-1">Prioridad
-                                *</label>
-                            <select name="prioridad" id="prioridad" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="Baja">Baja</option>
-                                <option value="Media" selected>Media</option>
-                                <option value="Alta">Alta</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="urgencia" class="block text-sm font-medium text-gray-700 mb-1">Urgencia *</label>
-                            <select name="urgencia" id="urgencia" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="Baja">Baja</option>
-                                <option value="Media" selected>Media</option>
-                                <option value="Alta">Alta</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección de Información Adicional -->
-                <div class="bg-gradient-to-r from-pepsi-blue/5 to-blue-50 p-5 rounded-lg border border-pepsi-blue/10">
-                    <h2 class="text-lg font-semibold text-pepsi-blue flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        Información Adicional
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                        <!-- Fecha de Recepción -->
-                        <div>
-                            <label for="fecha_recepcion" class="block text-sm font-medium text-gray-700 mb-1">Fecha de
-                                Recepción *</label>
-                            <input type="datetime-local" name="fecha_recepcion" id="fecha_recepcion" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                        </div>
-
-                        <!-- CEDIS -->
-                        <div>
-                            <label for="cedis_id" class="block text-sm font-medium text-gray-700 mb-1">CEDIS *</label>
-                            <select name="cedis_id" id="cedis_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="">Seleccione un CEDIS</option>
-                                @foreach ($cedis as $cedi)
-                                    <option value="{{ $cedi->id }}">{{ $cedi->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Tipo de Vía -->
-                        <div>
-                            <label for="tipo_via" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Vía
-                                *</label>
-                            <select name="tipo_via" id="tipo_via" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                <option value="Correo electrónico">Correo electrónico</option>
-                                <option value="Teléfono">Teléfono</option>
-                                <option value="Presencial">Presencial</option>
-                            </select>
-                        </div>
-
-                        <!-- Usuarios a Notificar -->
-                        <div>
-                            <label for="usuarios_notificar" class="block text-sm font-medium text-gray-700 mb-1">Usuarios
-                                a notificar (CC)</label>
-                            <select name="usuarios_notificar[]" id="usuarios_notificar" multiple
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pepsi-blue focus:border-transparent transition-colors">
-                                @if (isset($usuarios) && count($usuarios) > 0)
-                                    @foreach ($usuarios as $user)
-                                        <option value="{{ $user->id }}">{{ $user->nombre }} {{ $user->apellido }}
-                                            ({{ $user->email }})</option>
-                                    @endforeach
-                                @else
-                                    <!-- Opción alternativa si no hay usuarios disponibles -->
-                                    <option value="">No hay usuarios disponibles</option>
-                                @endif
-                            </select>
-                            <p class="mt-2 text-xs text-gray-500 bg-blue-50 p-2 rounded-md">
-                                💡 Mantén presionada la tecla Ctrl (Cmd en Mac) para seleccionar múltiples usuarios
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botones de acción -->
-            <div
-                class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-5 flex justify-end space-x-4 border-t border-gray-200">
-                <a href="{{ route('tickets.index') }}"
-                    class="inline-flex items-center px-5 py-3 bg-gray-200 border border-transparent rounded-lg font-semibold text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                    Cancelar
-                </a>
-                <button type="submit"
-                    class="inline-flex items-center px-5 py-3 bg-pepsi-blue border border-transparent rounded-lg font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pepsi-blue transition-colors shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Crear Ticket
-                </button>
-            </div>
-        </form>
     </div>
 
+    <!-- JavaScript para cargar CEDIS y servicios dinámicamente -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cargar servicios cuando se selecciona un área
-            document.getElementById('area_id').addEventListener('change', function() {
-                const areaId = this.value;
-                const servicioSelect = document.getElementById('servicio_id');
+            const regionSelect = document.querySelector('select[name="region_id"]');
+            const cedisSelect = document.querySelector('select[name="cedis_id"]');
+            const areaSelect = document.querySelector('select[name="area_id"]');
+            const servicioSelect = document.querySelector('select[name="servicio_id"]');
+
+            // Función para cargar CEDIS por región
+            function cargarCedisPorRegion(regionId) {
+                // Limpiar CEDIS
+                cedisSelect.innerHTML = '<option value="">Cargando CEDIS...</option>';
+                cedisSelect.disabled = true;
+
+                if (regionId) {
+                    fetch(`/cedis-por-region/${regionId}`)
+                        .then(response => response.json())
+                        .then(cedis => {
+                            cedisSelect.innerHTML = '<option value="">Seleccione el CEDIS/Planta</option>';
+
+                            if (cedis.length === 0) {
+                                cedisSelect.innerHTML = '<option value="">No hay CEDIS en esta región</option>';
+                            } else {
+                                cedis.forEach(cedi => {
+                                    const option = document.createElement('option');
+                                    option.value = cedi.id;
+                                    option.textContent = cedi.nombre;
+                                    cedisSelect.appendChild(option);
+                                });
+                            }
+                            cedisSelect.disabled = false;
+
+                            // Seleccionar CEDIS anterior si existe (en caso de error de validación)
+                            @if (old('cedis_id'))
+                                setTimeout(() => {
+                                    cedisSelect.value = "{{ old('cedis_id') }}";
+                                }, 100);
+                            @endif
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar CEDIS:', error);
+                            cedisSelect.innerHTML = '<option value="">Error al cargar CEDIS</option>';
+                            cedisSelect.disabled = false;
+                        });
+                } else {
+                    cedisSelect.innerHTML = '<option value="">Primero seleccione una región</option>';
+                    cedisSelect.disabled = false;
+                }
+            }
+
+            // Función para cargar servicios por área
+            function cargarServiciosPorArea(areaId) {
+                // Limpiar servicios
+                servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
+                servicioSelect.disabled = true;
 
                 if (areaId) {
                     fetch(`/api/servicios/${areaId}`)
                         .then(response => response.json())
-                        .then(data => {
-                            servicioSelect.innerHTML =
-                                '<option value="">Seleccione un servicio</option>';
-                            data.forEach(servicio => {
-                                servicioSelect.innerHTML +=
-                                    `<option value="${servicio.id}">${servicio.nombre}</option>`;
-                            });
+                        .then(servicios => {
+                            servicioSelect.innerHTML = '<option value="">Seleccione el servicio</option>';
+
+                            if (servicios.length === 0) {
+                                servicioSelect.innerHTML =
+                                    '<option value="">No hay servicios en esta área</option>';
+                            } else {
+                                servicios.forEach(servicio => {
+                                    const option = document.createElement('option');
+                                    option.value = servicio.id;
+                                    option.textContent = servicio.nombre;
+                                    servicioSelect.appendChild(option);
+                                });
+                            }
+                            servicioSelect.disabled = false;
+
+                            // Seleccionar servicio anterior si existe (en caso de error de validación)
+                            @if (old('servicio_id'))
+                                setTimeout(() => {
+                                    servicioSelect.value = "{{ old('servicio_id') }}";
+                                }, 100);
+                            @endif
                         })
                         .catch(error => {
                             console.error('Error al cargar servicios:', error);
-                            servicioSelect.innerHTML =
-                                '<option value="">Error al cargar servicios</option>';
+                            servicioSelect.innerHTML = '<option value="">Error al cargar servicios</option>';
+                            servicioSelect.disabled = false;
                         });
                 } else {
-                    servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+                    servicioSelect.innerHTML = '<option value="">Seleccione el servicio</option>';
+                    servicioSelect.disabled = false;
                 }
-            });
-
-            // Cargar tipos de naturaleza cuando se selecciona una naturaleza
-            document.getElementById('naturaleza_id').addEventListener('change', function() {
-                const naturalezaId = this.value;
-                const tipoSelect = document.getElementById('tipo_naturaleza_id');
-
-                if (naturalezaId) {
-                    fetch(`/api/tipos-naturaleza/${naturalezaId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            tipoSelect.innerHTML = '<option value="">Seleccione el tipo</option>';
-                            data.forEach(tipo => {
-                                tipoSelect.innerHTML +=
-                                    `<option value="${tipo.id}">${tipo.nombre}</option>`;
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error al cargar tipos de naturaleza:', error);
-                            tipoSelect.innerHTML = '<option value="">Error al cargar tipos</option>';
-                        });
-                } else {
-                    tipoSelect.innerHTML = '<option value="">Seleccione el tipo</option>';
-                }
-            });
-
-            // Establecer fecha y hora actual por defecto
-            const now = new Date();
-            const localDateTime = now.toISOString().slice(0, 16);
-            document.getElementById('fecha_recepcion').value = localDateTime;
-
-            // Añadir estilos a los selects múltiples
-            const multiSelect = document.getElementById('usuarios_notificar');
-            if (multiSelect) {
-                multiSelect.classList.add('h-32');
             }
+
+            // Event listeners
+            if (regionSelect && cedisSelect) {
+                regionSelect.addEventListener('change', function() {
+                    cargarCedisPorRegion(this.value);
+                });
+            }
+
+            if (areaSelect && servicioSelect) {
+                areaSelect.addEventListener('change', function() {
+                    cargarServiciosPorArea(this.value);
+                });
+            }
+
+            // Cargar datos iniciales si hay valores en old (en caso de error de validación)
+            @if (old('region_id'))
+                // Cargar CEDIS de la región seleccionada
+                cargarCedisPorRegion("{{ old('region_id') }}");
+            @endif
+
+            @if (old('area_id'))
+                // Cargar servicios del área seleccionada
+                cargarServiciosPorArea("{{ old('area_id') }}");
+            @endif
         });
     </script>
 @endsection

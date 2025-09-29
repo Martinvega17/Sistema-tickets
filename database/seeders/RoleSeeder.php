@@ -21,7 +21,7 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'nombre' => 'Supervisor',
+                'nombre' => 'Mesa de control',
                 'descripcion' => 'Supervisa múltiples CEDIS y regiones',
                 'permisos' => json_encode([
                     'tickets.ver', 'tickets.crear', 'tickets.editar', 'tickets.asignar',
