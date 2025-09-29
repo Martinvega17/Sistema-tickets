@@ -21,66 +21,30 @@ class TicketsController extends Controller
      */
     public function index(Request $request)
     {
-        // Verificar permisos según el rol
-        $this->checkTicketsPermission();
-
-        $query = Tickets::with([
-            'usuario',
-            'ingenieroAsignado',
-            'cedis',
-            'region',
-            'area',
-            'servicio'
-        ]);
+        $query = Tickets::with(['usuario', 'ingenieroAsignado', 'area'])
+            ->latest('fecha_recepcion');
 
         // Filtros
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('titulo', 'like', "%$search%")
-                    ->orWhere('descripcion', 'like', "%$search%")
-                    ->orWhereHas('usuario', function ($q) use ($search) {
-                        $q->where('nombre', 'like', "%$search%")
-                            ->orWhere('apellido', 'like', "%$search%");
-                    });
-            });
-        }
-
-        if ($request->has('estatus') && !empty($request->estatus)) {
+        if ($request->has('estatus') && $request->estatus != '') {
             $query->where('estatus', $request->estatus);
         }
 
-        if ($request->has('prioridad') && !empty($request->prioridad)) {
+        if ($request->has('prioridad') && $request->prioridad != '') {
             $query->where('prioridad', $request->prioridad);
         }
 
-        if ($request->has('cedis_id') && !empty($request->cedis_id)) {
-            $query->where('cedis_id', $request->cedis_id);
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('titulo', 'like', "%{$search}%")
+                    ->orWhere('descripcion', 'like', "%{$search}%")
+                    ->orWhere('ticket_number', 'like', "%{$search}%");
+            });
         }
 
-        if ($request->has('region_id') && !empty($request->region_id)) {
-            $query->where('region_id', $request->region_id);
-        }
+        $tickets = $query->paginate(10);
 
-        // Ordenamiento
-        $sortField = $request->get('sort', 'fecha_recepcion');
-        $sortDirection = $request->get('direction', 'desc');
-        $query->orderBy($sortField, $sortDirection);
-
-        $tickets = $query->paginate(20);
-
-        // Datos para filtros
-        $cedis = Cedis::where('estatus', 'activo')->orderBy('nombre')->get();
-        $regiones = Region::where('estatus', 'activo')->orderBy('nombre')->get();
-        $ingenieros = User::where('rol_id', 4)->where('estatus', 1)->orderBy('nombre')->get();
-
-        // Pasar datos a la vista de forma explícita
-        return view('tickets.index', [
-            'tickets' => $tickets,
-            'cedis' => $cedis,
-            'regiones' => $regiones,
-            'ingenieros' => $ingenieros
-        ]);
+        return view('tickets.index', compact('tickets'));
     }
 
     /**
