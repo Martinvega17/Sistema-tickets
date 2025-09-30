@@ -1,61 +1,109 @@
-console.log('🔴 SCRIPT INLINE EJECUTADO');
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('🎯 Inicializando carga dinámica...');
 
-function inicializarCedis() {
-    console.log('🟢 inicializarCedis llamado');
+    // Elementos para CEDIS
+    const regionSelect = document.querySelector('select[name="region_id"]');
+    const cedisSelect = document.querySelector('select[name="cedis_id"]');
 
-    const region = document.querySelector('select[name="region_id"]');
-    const cedis = document.querySelector('select[name="cedis_id"]');
+    // Elementos para Servicios
+    const areaSelect = document.querySelector('select[name="area_id"]');
+    const servicioSelect = document.querySelector('select[name="servicio_id"]');
 
-    console.log('Elementos querySelector:', {
-        region,
-        cedis
-    });
+    // Función para cargar CEDIS
+    function cargarCedis(regionId) {
+        if (!regionId) {
+            cedisSelect.innerHTML = '<option value="">Primero seleccione una región</option>';
+            return;
+        }
 
-    if (!region || !cedis) {
-        console.log('⏳ Reintentando en 500ms...');
-        setTimeout(inicializarCedis, 500);
-        return;
-    }
+        cedisSelect.innerHTML = '<option value="">Cargando CEDIS...</option>';
+        cedisSelect.disabled = true;
 
-    console.log('✅ ELEMENTOS ENCONTRADOS CON QUERYSELECTOR');
-
-    region.onchange = function () {
-        console.log('🎯 ONCHANGE - Valor:', this.value);
-
-        cedis.innerHTML = '<option value="">Cargando...</option>';
-        cedis.disabled = true;
-
-        fetch(`/get-cedis-by-region?region_id=${this.value}`)
-            .then(r => r.json())
+        fetch(`/get-cedis-by-region?region_id=${regionId}`)
+            .then(response => response.json())
             .then(data => {
-                console.log('CEDIS data:', data);
-                cedis.innerHTML = '<option value="">Selecciona CEDIS</option>';
-                data.forEach(item => {
-                    cedis.innerHTML += `<option value="${item.id}">${item.nombre}</option>`;
-                });
-                cedis.disabled = false;
+                cedisSelect.innerHTML = '<option value="">Selecciona un CEDIS</option>';
+
+                if (data.length > 0) {
+                    data.forEach(cedis => {
+                        const option = document.createElement('option');
+                        option.value = cedis.id;
+                        option.textContent = cedis.nombre;
+                        cedisSelect.appendChild(option);
+                    });
+                } else {
+                    cedisSelect.innerHTML = '<option value="">No hay CEDIS disponibles</option>';
+                }
+
+                cedisSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error al cargar CEDIS:', error);
+                cedisSelect.innerHTML = '<option value="">Error al cargar CEDIS</option>';
+                cedisSelect.disabled = false;
             });
-    };
-
-    // Trigger inicial
-    if (region.value) {
-        console.log('🔥 DISPARANDO EVENTO INICIAL');
-        region.onchange();
     }
-}
 
-// Múltiples formas de inicializar
-document.addEventListener('DOMContentLoaded', inicializarCedis);
-window.addEventListener('load', inicializarCedis);
-setTimeout(inicializarCedis, 1000);
+    // Función para cargar Servicios
+    function cargarServicios(areaId) {
+        if (!areaId) {
+            servicioSelect.innerHTML = '<option value="">Primero seleccione un área</option>';
+            return;
+        }
 
-// También exponer la función globalmente por si acaso
-window.cargarCedisManual = function () {
-    const region = document.querySelector('select[name="region_id"]');
-    if (region && region.value) {
-        console.log('🔧 CARGA MANUAL con región:', region.value);
-        region.onchange();
-    } else {
-        alert('Selecciona una región primero');
+        servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
+        servicioSelect.disabled = true;
+
+        fetch(`/api/servicios/${areaId}`)
+            .then(response => response.json())
+            .then(data => {
+                servicioSelect.innerHTML = '<option value="">Selecciona un servicio</option>';
+
+                if (data.length > 0) {
+                    data.forEach(servicio => {
+                        const option = document.createElement('option');
+                        option.value = servicio.id;
+                        option.textContent = servicio.nombre;
+                        servicioSelect.appendChild(option);
+                    });
+                } else {
+                    servicioSelect.innerHTML = '<option value="">No hay servicios disponibles</option>';
+                }
+
+                servicioSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error al cargar servicios:', error);
+                servicioSelect.innerHTML = '<option value="">Error al cargar servicios</option>';
+                servicioSelect.disabled = false;
+            });
     }
-};
+
+    // Event listeners para Región -> CEDIS
+    if (regionSelect && cedisSelect) {
+        regionSelect.addEventListener('change', function () {
+            console.log('🔄 Cambio de región:', this.value);
+            cargarCedis(this.value);
+        });
+
+        // Cargar CEDIS si ya hay una región seleccionada
+        if (regionSelect.value) {
+            cargarCedis(regionSelect.value);
+        }
+    }
+
+    // Event listeners para Área -> Servicios
+    if (areaSelect && servicioSelect) {
+        areaSelect.addEventListener('change', function () {
+            console.log('🔄 Cambio de área:', this.value);
+            cargarServicios(this.value);
+        });
+
+        // Cargar Servicios si ya hay un área seleccionada
+        if (areaSelect.value) {
+            cargarServicios(areaSelect.value);
+        }
+    }
+
+    console.log('✅ Sistema de carga dinámica configurado');
+});

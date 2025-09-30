@@ -80,7 +80,8 @@
         </div>
 
         <nav class="flex-1 p-4 space-y-2">
-            <a href="/dashboard" class="flex items-center px-4 py-3 rounded-lg bg-blue-700/30 hover:bg-blue-700/50">
+            <a href="{{ route('dashboard') }}"
+                class="flex items-center px-4 py-3 rounded-lg bg-blue-700/30 hover:bg-blue-700/50">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -89,7 +90,7 @@
                 </svg>
                 Inicio
             </a>
-            <a href="/tickets" class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
+            <a href="{{ route('tickets.index') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -99,7 +100,8 @@
                 Tickets
             </a>
             @if (in_array(Auth::user()->rol_id, [1, 2]))
-                <a href="/cedis" class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
+                <a href="{{ route('admin.cedis.index') }}"
+                    class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -111,7 +113,8 @@
                     CEDIS
                 </a>
 
-                <a href="/usuarios" class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
+                <a href="{{ route('usuarios.index') }}"
+                    class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-700/30">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -187,7 +190,7 @@
         </main>
     </div>
     <div id="toast-container" class="fixed bottom-5 right-5 space-y-2 z-50"></div>
-    
+
 
     <script src="{{ asset('js/app.js') }}"></script>
 

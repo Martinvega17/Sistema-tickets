@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -20,8 +21,8 @@ use App\Http\Controllers\Admin\RegionController;
 use App\Models\Cedis;
 use Illuminate\Support\Facades\Route;
 
-// Redirección principal
-Route::redirect('/', '/login');
+// Redirección principal - REDIRIGE AL DASHBOARD CORRECTO
+Route::redirect('/', '/dashboard');
 
 // Rutas de autenticación (solo para invitados)
 Route::middleware('guest')->group(function () {
@@ -54,7 +55,6 @@ Route::get('/cedis-por-region/{regionId}', function ($regionId) {
     return response()->json($cedis);
 });
 
-
 // Ruta para Self Service (accesible sin autenticación)
 Route::get('/self-service', [SelfServiceController::class, 'index'])->name('self-service');
 
@@ -63,32 +63,23 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
+    // ✅ DASHBOARD PRINCIPAL - REDIRIGE SEGÚN ROL
+    Route::get('/dashboard', function () {
+        $user = Auth::user();
 
+        if (in_array($user->rol_id, [1, 2])) { // Admin y Supervisor
+            return redirect()->route('admin.dashboard');
+        } else { // Otros usuarios
+            return app(UserDashboardController::class)->index();
+        }
+    })->name('dashboard');
 
+    // ✅ RUTAS COMPARTIDAS PARA TODOS LOS USUARIOS
+    Route::resource('tickets', TicketsController::class);
+    Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
+    Route::get('/get-cedis-by-region', [TicketsController::class, 'getCedisByRegion']);
 
-    // Rutas para gestión de usuarios
-    Route::middleware(['auth', 'role:1,2'])->group(function () {
-        Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
-        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create');
-        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store');
-        Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
-        Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
-    });
-
-    // Rutas de usuarios con restricción de roles
-    Route::middleware('role:1,2,3')->group(function () {
-        Route::controller(UserController::class)->group(function () {
-            Route::get('/usuarios/{user}', 'show')->name('usuarios.show');
-            Route::put('/usuarios/{user}/estatus', 'updateStatus')->name('usuarios.estatus');
-            Route::put('/usuarios/{user}/password', 'resetPassword')->name('usuarios.password');
-        });
-    });
-
-
-    // Base de Conocimiento - Todas las rutas en un resource
+    // Base de Conocimiento
     Route::prefix('knowledgebase')->controller(KnowledgeBaseController::class)->group(function () {
         Route::get('/', 'index')->name('knowledgebase.index');
         Route::get('/create', 'create')->name('knowledgebase.create');
@@ -103,60 +94,57 @@ Route::middleware('auth')->group(function () {
     // Alias para compatibilidad
     Route::get('/knowledge/{id}', [KnowledgeBaseController::class, 'show'])
         ->name('knowledgebase.article.alias');
-});
 
-// Rutas para tickets
-Route::resource('tickets', TicketsController::class);
-Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
+    // Perfil de usuario (para todos)
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
+        Route::get('/personal', [ProfileController::class, 'personal'])->name('profile.personal');
+        Route::get('/company', [ProfileController::class, 'company'])->name('profile.company');
+        Route::get('/password', [ProfileController::class, 'password'])->name('profile.password');
+        Route::post('/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+        Route::post('/personal', [ProfileController::class, 'updatePersonalData'])->name('profile.updatePersonal');
+        Route::post('/company', [ProfileController::class, 'updateCompanyData'])->name('profile.updateCompany');
+        Route::post('/language', [ProfileController::class, 'updateLanguage'])->name('profile.updateLanguage');
+    });
 
+    // ✅ RUTAS SOLO PARA ADMIN Y SUPERVISOR
+    Route::middleware(['role:1,2'])->group(function () {
+        // Gestión de usuarios
+        Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.modals.create');
+        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store');
+        Route::get('/usuarios/{user}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
+        Route::put('/usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update');
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/tickets/{id}', [TicketsController::class, 'show'])->name('tickets.show');
-    Route::get('/get-cedis-by-region', [TicketsController::class, 'getCedisByRegion']);
-
-    // ... otras rutas
-});
-
-
-Route::middleware(['auth'])->group(function () {
-    Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::resource('areas', AreaController::class);
-        Route::resource('servicios', ServicioController::class);
-        Route::resource('naturaleza', NaturalezaController::class);
-        Route::resource('categorias', CategoriaController::class);
-        Route::resource('regiones', RegionController::class);
-
-        // Rutas para CEDIS
-        Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
-        Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
-
-        Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
-        Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
-        Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
-        Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
-        Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
-
-        Route::post('/cedis/filter', [CedisController::class, 'filter'])->name('admin.cedis.filter');
+        // Rutas de usuarios con más permisos
+        Route::controller(UserController::class)->group(function () {
+            Route::get('/usuarios/{user}', 'show')->name('usuarios.show');
+            Route::put('/usuarios/{user}/estatus', 'updateStatus')->name('usuarios.estatus');
+            Route::put('/usuarios/{user}/password', 'resetPassword')->name('usuarios.password');
+        });
     });
 });
 
-//Rutas para usarios 
-Route::middleware(['auth', 'role:3,4,5'])->group(function () {
-    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-});
+// ✅ RUTAS DE ADMINISTRACIÓN (PREFIJO ADMIN)
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:1,2'])->group(function () {
+    // Dashboard de admin
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/configuracion', [DashboardController::class, 'configuracion'])->name('configuracion');
 
-// Rutas para perfil de usuario
-Route::prefix('profile')->group(function () {
-    Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/personal', [ProfileController::class, 'personal'])->name('profile.personal');
-    Route::get('/company', [ProfileController::class, 'company'])->name('profile.company');
-    Route::get('/password', [ProfileController::class, 'password'])->name('profile.password');
+    // Catálogos administrativos
+    Route::resource('areas', AreaController::class);
+    Route::resource('servicios', ServicioController::class);
+    Route::resource('naturaleza', NaturalezaController::class);
+    Route::resource('categorias', CategoriaController::class);
+    Route::resource('regiones', RegionController::class);
 
-    // SOLO UNA RUTA POST PARA PASSWORD
-    Route::post('/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
-
-    Route::post('/personal', [ProfileController::class, 'updatePersonalData'])->name('profile.updatePersonal');
-    Route::post('/company', [ProfileController::class, 'updateCompanyData'])->name('profile.updateCompany');
-    Route::post('/language', [ProfileController::class, 'updateLanguage'])->name('profile.updateLanguage');
+    // Rutas para CEDIS
+    Route::get('/cedis', [CedisController::class, 'index'])->name('cedis.index');
+    Route::get('/cedis/create', [CedisController::class, 'create'])->name('cedis.create');
+    Route::post('/cedis', [CedisController::class, 'store'])->name('cedis.store');
+    Route::get('/cedis/{cedis}/edit', [CedisController::class, 'edit'])->name('cedis.edit');
+    Route::put('/cedis/{cedis}', [CedisController::class, 'update'])->name('cedis.update');
+    Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
+    Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
+    Route::post('/cedis/filter', [CedisController::class, 'filter'])->name('cedis.filter');
 });

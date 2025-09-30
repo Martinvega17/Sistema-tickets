@@ -9,7 +9,7 @@ use App\Models\Cedis;
 use App\Models\Area;
 use App\Models\Categoria;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -21,6 +21,11 @@ class DashboardController extends Controller
 
     public function index()
     {
+        // Verificar que el usuario tenga permisos de admin (redundante por el middleware, pero por seguridad)
+        if (!in_array(Auth::user()->rol_id, [1, 2])) {
+            return redirect()->route('dashboard')->with('error', 'No tienes permisos para acceder al panel de administración.');
+        }
+
         $stats = [
             'total_tickets' => Tickets::count(),
             'tickets_abiertos' => Tickets::where('estatus', 'Abierto')->count(),

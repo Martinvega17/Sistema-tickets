@@ -106,7 +106,7 @@
                         @enderror
                     </div>
 
-                    <!-- Categorización Básica -->
+                    <!-- Área y Servicio -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="area_id" class="block text-sm font-medium text-gray-700 mb-2">Área</label>
@@ -126,45 +126,7 @@
                             <label for="servicio_id" class="block text-sm font-medium text-gray-700 mb-2">Servicio</label>
                             <select id="servicio_id" name="servicio_id"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Seleccionar servicio</option>
-                                @foreach ($servicios as $servicio)
-                                    <option value="{{ $servicio->id }}"
-                                        {{ old('servicio_id') == $servicio->id ? 'selected' : '' }}>
-                                        {{ $servicio->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Categorización Adicional -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="categoria_id" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-                            <select id="categoria_id" name="categoria_id"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Seleccionar categoría</option>
-                                @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}"
-                                        {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
-                                        {{ $categoria->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="naturaleza_id"
-                                class="block text-sm font-medium text-gray-700 mb-2">Naturaleza</label>
-                            <select id="naturaleza_id" name="naturaleza_id"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Seleccionar naturaleza</option>
-                                @foreach ($naturalezas as $naturaleza)
-                                    <option value="{{ $naturaleza->id }}"
-                                        {{ old('naturaleza_id') == $naturaleza->id ? 'selected' : '' }}>
-                                        {{ $naturaleza->nombre }}
-                                    </option>
-                                @endforeach
+                                <option value="">Primero seleccione un área</option>
                             </select>
                         </div>
                     </div>
@@ -202,32 +164,27 @@
                     </div>
                 </div>
             </form>
-            {{-- AL FINAL DEL CONTENIDO, ANTES DE CERRAR EL DIV --}}
-        </div>{{-- Cierre del container --}}
+        </div>
 
-
-
-
-    </div>
-
-    <!-- Información para el usuario -->
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">Proceso de atención</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <p>Una vez creado el ticket, será revisado por Mesa de Control quien lo asignará al personal de
-                        soporte correspondiente.</p>
+        <!-- Información para el usuario -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Proceso de atención</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <p>Una vez creado el ticket, será revisado por Mesa de Control quien lo asignará al personal de
+                            soporte correspondiente.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-@endsection
 
+
+@endsection
