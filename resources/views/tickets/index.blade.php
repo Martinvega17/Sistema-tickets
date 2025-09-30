@@ -146,7 +146,8 @@
             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div class="flex items-center">
                     <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-red-800">{{ App\Models\Tickets::prioridadAlta()->count() }}</h3>
+                        <h3 class="text-2xl font-bold text-red-800">{{ App\Models\Tickets::prioridadAlta()->count() }}
+                        </h3>
                         <p class="text-red-600 text-sm">Alta Prioridad</p>
                     </div>
                     <div class="text-red-500">
@@ -171,8 +172,8 @@
                                 Código</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Asunto</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área
-                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Vencimiento</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Prioridad</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
