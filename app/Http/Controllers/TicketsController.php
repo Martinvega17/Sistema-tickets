@@ -52,97 +52,84 @@ class TicketsController extends Controller
      */
     public function create()
     {
-        $this->checkTicketsPermission();
+        $regiones = \App\Models\Region::where('estatus', 'activo')
+            ->orderBy('nombre')
+            ->get();
 
-        $cedis = Cedis::where('estatus', 'activo')->orderBy('nombre')->get();
-        $regiones = Region::where('estatus', 'activo')->orderBy('nombre')->get();
-        $areas = Area::where('estatus', 'activo')->orderBy('nombre')->get();
-        $ingenieros = User::where('rol_id', 4)->where('estatus', 1)->orderBy('nombre')->get();
-        $usuarios = User::where('estatus', 1)->orderBy('nombre')->get();
+        // Verifica que hay regiones
+        if ($regiones->isEmpty()) {
+            Log::warning('No se encontraron regiones activas');
+        } else {
+            Log::info('Regiones cargadas:', ['count' => $regiones->count()]);
+        }
+
+        $areas = \App\Models\Area::all();
+        $servicios = \App\Models\Servicio::all();
+        $categorias = \App\Models\Categoria::all();
+        $naturalezas = \App\Models\Naturaleza::all();
 
         return view('tickets.create', compact(
-            'cedis',
             'regiones',
             'areas',
-            'ingenieros',
-            'usuarios'
+            'servicios',
+            'categorias',
+            'naturalezas'
         ));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Verificar permisos
-        $this->checkTicketsPermission();
-
-        Log::info('=== STORE TICKET METHOD CALLED ===');
-        Log::info('Datos recibidos:', $request->all());
-
-        // Validación
         $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'descripcion' => 'required|string',
             'region_id' => 'required|exists:regiones,id',
             'cedis_id' => 'required|exists:cedis,id',
-            'area_id' => 'required|exists:areas,id',
+            'titulo' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'area_id' => 'nullable|exists:areas,id',
             'servicio_id' => 'nullable|exists:servicios,id',
+            'categoria_id' => 'nullable|exists:categorias,id',
+            'naturaleza_id' => 'nullable|exists:naturalezas,id',
             'observaciones' => 'nullable|string',
         ]);
 
-        Log::info('Datos validados:', $validated);
-
         try {
-            // Asignar valores automáticamente
-            $ticketData = [
-                'titulo' => $validated['titulo'],
-                'descripcion' => $validated['descripcion'],
-                'region_id' => $validated['region_id'],
-                'cedis_id' => $validated['cedis_id'],
-                'area_id' => $validated['area_id'],
-                'servicio_id' => $validated['servicio_id'] ?? null,
-
-                // Valores automáticos
-                'estatus' => 'Abierto',
-                'prioridad' => 'Media',
-                'impacto' => 'Media',
-                'urgencia' => 'Media',
-                'fecha_recepcion' => now(),
-                'tipo_via' => 'Presencial',
-                'usuario_id' => Auth::id(),
-            ];
-
-            Log::info('Datos para crear ticket:', $ticketData);
-
-            // Asignar automáticamente a Mesa de Control (Rol 2)
-            $mesaControl = User::where('rol_id', 2)
-                ->where('estatus', 1)
-                ->first();
-
-            if ($mesaControl) {
-                $ticketData['responsable_id'] = $mesaControl->id;
-                Log::info('Asignado a Mesa de Control: ' . $mesaControl->nombre);
-            } else {
-                Log::warning('No se encontró usuario con rol 2 (Mesa de Control)');
+            // Validar que el CEDIS pertenezca a la región seleccionada
+            $cedis = \App\Models\Cedis::find($validated['cedis_id']);
+            if ($cedis->region_id != $validated['region_id']) {
+                return redirect()->back()
+                    ->with('error', 'El CEDIS seleccionado no pertenece a la región elegida.')
+                    ->withInput();
             }
 
-            // Crear el ticket
-            $ticket = Tickets::create($ticketData);
+            // OPCIÓN 1: Usar Auth facade
+            $validated['usuario_id'] = \Illuminate\Support\Facades\Auth::id();
 
-            Log::info('Ticket creado exitosamente. ID: ' . $ticket->id);
+            // OPCIÓN 2: Usar el request
+            // $validated['usuario_id'] = $request->user()->id;
 
-            return redirect()->route('tickets.index')
-                ->with('success', 'Ticket creado correctamente. Será asignado a Mesa de Control para su revisión.');
+            // Asignar fecha de recepción actual
+            $validated['fecha_recepcion'] = now();
+
+            // Asignar valores por defecto
+            $validated['estatus'] = 'Abierto';
+            $validated['status'] = 'Abierto';
+            $validated['prioridad'] = 'Media';
+            $validated['impacto'] = 'Media';
+            $validated['urgencia'] = 'Media';
+            $validated['tipo_via'] = 'Correo electrónico';
+            $validated['medio_atencion'] = 'Presencial';
+
+            $ticket = Tickets::create($validated);
+
+            return redirect()->route('tickets.show', $ticket->id)
+                ->with('success', 'Ticket creado exitosamente. Será revisado por Mesa de Control.');
         } catch (\Exception $e) {
-            Log::error('Error al crear ticket: ' . $e->getMessage());
-            Log::error('Trace: ' . $e->getTraceAsString());
-
-            return back()
+            return redirect()->back()
                 ->with('error', 'Error al crear el ticket: ' . $e->getMessage())
                 ->withInput();
         }
     }
+
+
 
     /**
      * Display the specified resource.
@@ -268,5 +255,53 @@ class TicketsController extends Controller
             ->get();
 
         return response()->json($servicios);
+    }
+
+    public function getCedisByRegion(Request $request)
+    {
+        $regionId = $request->query('region_id');
+
+        Log::info('🔍 Solicitando CEDIS para región:', ['region_id' => $regionId]);
+
+        // DEBUG: Verificar todas las regiones disponibles
+        $todasRegiones = \App\Models\Region::where('estatus', 'activo')->get();
+        Log::info('📍 Regiones disponibles:', $todasRegiones->pluck('nombre', 'id')->toArray());
+
+        if (!$regionId) {
+            Log::warning('❌ No se proporcionó region_id');
+            return response()->json([]);
+        }
+
+        try {
+            $cedis = Cedis::where('region_id', $regionId)
+                ->where('estatus', 'activo')
+                ->orderBy('nombre')
+                ->get(['id', 'nombre', 'region_id']);
+
+            Log::info('✅ CEDIS encontrados:', [
+                'count' => $cedis->count(),
+                'region_id' => $regionId,
+                'cedis' => $cedis->pluck('nombre')->toArray()
+            ]);
+
+            // Si no hay CEDIS, verificar si la región existe
+            if ($cedis->count() === 0) {
+                $region = \App\Models\Region::find($regionId);
+                Log::warning('⚠️ No hay CEDIS para la región:', [
+                    'region_id' => $regionId,
+                    'region_nombre' => $region ? $region->nombre : 'No encontrada'
+                ]);
+            }
+
+            return response()->json($cedis);
+        } catch (\Exception $e) {
+            Log::error('❌ Error al cargar CEDIS:', [
+                'error' => $e->getMessage(),
+                'region_id' => $regionId,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json(['error' => 'Error al cargar CEDIS'], 500);
+        }
     }
 }

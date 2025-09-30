@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User; // ✅ AGREGAR
 
 class Tickets extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'ticket_number', // Agregar este campo
+        'ticket_number',
         'titulo',
         'descripcion',
         'estatus',
@@ -35,7 +36,9 @@ class Tickets extends Model
         'tiempo_solucion',
         'tiempo_diagnostico',
         'tiempo_reparacion',
-        'observaciones'
+        'observaciones',
+        'medio_atencion', // ✅ AGREGAR este campo que usas en el store
+        'status' // ✅ AGREGAR este campo que usas en el store
     ];
 
     protected $casts = [
@@ -54,7 +57,8 @@ class Tickets extends Model
             }
 
             // Asignar automáticamente a mesa de control (rol 2)
-            $mesaControl = User::where('role_id', 2)->first();
+            // ✅ VERIFICAR: Cambia 'rol_id' por 'role_id' si es necesario
+            $mesaControl = User::where('rol_id', 2)->first();
             if ($mesaControl && !$ticket->responsable_id) {
                 $ticket->responsable_id = $mesaControl->id;
             }
@@ -117,8 +121,17 @@ class Tickets extends Model
         return $this->belongsTo(Actividad::class, 'actividad_id');
     }
 
-    // Relación con notas - CORREGIDA
-   
+    // ✅ RELACIÓN CON NOTES COMPLETADA
+    public function notes()
+    {
+        return $this->hasMany(TicketNote::class, 'ticket_id');
+    }
+
+    // ✅ RELACIÓN CON USUARIO ASIGNADO (si la necesitas)
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'ingeniero_asignado_id');
+    }
 
     // Scopes para filtros comunes
     public function scopeAbiertos($query)

@@ -187,6 +187,10 @@
         </main>
     </div>
     <div id="toast-container" class="fixed bottom-5 right-5 space-y-2 z-50"></div>
+    
+
+    <script src="{{ asset('js/app.js') }}"></script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -220,6 +224,7 @@
             });
         });
     </script>
+    @yield('scripts')
 
 </body>
 

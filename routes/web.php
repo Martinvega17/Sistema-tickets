@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -15,9 +16,9 @@ use App\Http\Controllers\Admin\NaturalezaController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RegionController;
+
 use App\Models\Cedis;
 use Illuminate\Support\Facades\Route;
-
 
 // Redirección principal
 Route::redirect('/', '/login');
@@ -104,15 +105,16 @@ Route::middleware('auth')->group(function () {
         ->name('knowledgebase.article.alias');
 });
 
-
 // Rutas para tickets
 Route::resource('tickets', TicketsController::class);
 Route::get('/api/servicios/{area}', [TicketsController::class, 'getServiciosByArea']);
 
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/tickets/{id}', [TicketsController::class, 'show'])->name('tickets.show');
-    Route::post('/tickets/{ticketId}/notes', [TicketsController::class, 'storeNote'])->name('tickets.notes.store');
-    Route::post('/tickets/{ticketId}/assign', [TicketsController::class, 'assign'])->name('tickets.assign');
+    Route::get('/get-cedis-by-region', [TicketsController::class, 'getCedisByRegion']);
+
+    // ... otras rutas
 });
 
 
@@ -135,12 +137,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/cedis/{cedis}', [CedisController::class, 'destroy'])->name('cedis.destroy');
         Route::patch('/cedis/{cedis}/toggle-status', [CedisController::class, 'toggleStatus'])->name('cedis.toggle-status');
 
-        // ✅ CORREGIR ESTA LÍNEA - quita el 'admin.' extra
         Route::post('/cedis/filter', [CedisController::class, 'filter'])->name('admin.cedis.filter');
     });
 });
-
-
 
 //Rutas para usarios 
 Route::middleware(['auth', 'role:3,4,5'])->group(function () {
