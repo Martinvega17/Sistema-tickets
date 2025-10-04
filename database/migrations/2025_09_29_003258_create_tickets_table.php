@@ -20,7 +20,6 @@ return new class extends Migration
             $table->text('descripcion');
 
             // Estados y prioridades
-            $table->enum('estatus', ['Abierto', 'En progreso', 'En espera', 'Resuelto', 'Cerrado'])->default('Abierto');
             $table->enum('status', ['Abierto', 'En progreso', 'Suspendido', 'Resuelto', 'Cerrado'])->default('Abierto');
             $table->enum('prioridad', ['Baja', 'Media', 'Alta', 'Crítica'])->default('Media');
             $table->integer('priority')->default(3);
